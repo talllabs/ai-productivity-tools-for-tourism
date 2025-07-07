@@ -1,14 +1,4 @@
 <!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>AI Productivity Tools for Tourism</title>
-  
-
-</head>
-<body>
-<!-- partial:index.partial.html -->
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -338,6 +328,7 @@
         let currentUser = null;
         const upvotedTools = new Set();
         let placeholderInterval;
+        let pendingSaveToolId = null;
 
         const toolsGrid = document.getElementById('tools-grid');
         const categoryList = document.getElementById('category-list');
@@ -565,6 +556,7 @@
         
         function handleSaveClick(toolId) {
             if (!currentUser) {
+                pendingSaveToolId = toolId;
                 loginModal.classList.remove('hidden');
                 return;
             }
@@ -577,7 +569,7 @@
                 }
                 performSearchAndFilter(); // Re-render to update heart states
                 // Also update detail view if it's open
-                if (!toolDetailView.classList.contains('hidden')) {
+                if (!toolDetailView.classList.contains('hidden') && parseInt(document.querySelector('.save-btn-detail').dataset.toolId) === toolId) {
                     const saveBtnDetail = document.querySelector('.save-btn-detail');
                     if (currentUser.savedTools.has(toolId)) {
                         saveBtnDetail.classList.add('saved');
@@ -622,7 +614,7 @@
             e.preventDefault();
             const link = e.target.closest('.category-link');
             if (link) {
-                document.querySelectorAll('#category-list .category-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('#category-list .category-link, #my-tools-list .category-link').forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
                 activeFilters.category = link.dataset.category;
                 performSearchAndFilter();
@@ -633,7 +625,7 @@
             e.preventDefault();
             const link = e.target.closest('.category-link');
             if (link) {
-                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('#category-list .category-link, #my-tools-list .category-link').forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
                 activeFilters.category = link.dataset.category;
                 performSearchAndFilter();
@@ -764,12 +756,19 @@
             updateAuthUI();
         });
 
+        function handleSuccessfulAuth(email) {
+            currentUser = { email, savedTools: new Set() };
+            updateAuthUI();
+            if (pendingSaveToolId) {
+                handleSaveClick(pendingSaveToolId);
+                pendingSaveToolId = null;
+            }
+        }
+
         signupForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = e.target.elements[0].value;
-            // In a real app, you would also handle the password securely
-            currentUser = { email, savedTools: new Set() };
-            updateAuthUI();
+            handleSuccessfulAuth(email);
             closeModal(signupModal);
             e.target.reset();
         });
@@ -777,9 +776,7 @@
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = e.target.elements[0].value;
-            // In a real app, you would validate credentials
-            currentUser = { email, savedTools: new Set() };
-            updateAuthUI();
+            handleSuccessfulAuth(email);
             closeModal(loginModal);
             e.target.reset();
         });
@@ -831,9 +828,5 @@
         updateAuthUI();
         startPlaceholderRotation();
     </script>
-</body>
-</html>
-<!-- partial -->
-  
 </body>
 </html>
