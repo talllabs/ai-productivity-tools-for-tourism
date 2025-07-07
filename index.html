@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>AI Productivity Tools for Tourism</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools for Tourism Professionals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tool-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .upvote-btn.upvoted {
+            background-color: #2563eb; /* A darker blue */
+            color: white;
+            cursor: not-allowed;
+        }
+        .upvote-btn.upvoted svg {
+            fill: white;
+        }
+        .save-btn svg {
+            transition: fill 0.2s, stroke 0.2s;
+        }
+        .save-btn.saved svg {
+            fill: #ef4444; /* red-500 */
+            stroke: #ef4444;
+        }
+        .category-link.active {
+            background-color: #eef2ff;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details > summary::after {
+            content: ' ▸';
+            float: right;
+            transform: rotate(0);
+            transition: transform 0.2s;
+        }
+        details[open] > summary::after {
+           transform: rotate(90deg);
+        }
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+        .feature-tag-clickable {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .feature-tag-clickable:hover {
+            background-color: #dbeafe; /* lighter blue */
+        }
+        #search-input::placeholder {
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-blue-600">
+                <a href="#">AI Pro Tools | Tourism</a>
+            </div>
+            <div id="auth-links" class="hidden md:flex space-x-4 items-center">
+                <a href="#" id="login-btn" class="text-gray-600 hover:text-blue-600 transition duration-300">Login</a>
+                <a href="#" id="signup-btn" class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300">Sign Up</a>
+            </div>
+            <div id="user-session" class="hidden md:flex space-x-4 items-center">
+                 <span id="welcome-msg" class="text-gray-700"></span>
+                 <a href="#" id="logout-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-300 transition duration-300">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero bg-blue-600 text-white text-center py-20">
+        <div class="container mx-auto px-6">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">AI Productivity Tools for Tourism</h1>
+            <p class="text-lg md:text-xl mb-8">What challenge are you trying to solve? Describe it below.</p>
+            <div class="max-w-2xl mx-auto flex flex-col sm:flex-row gap-2">
+                <input type="text" id="search-input" placeholder="e.g., Transcribe my zoom calls" class="w-full p-4 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <button id="search-btn" class="bg-white text-blue-600 font-bold py-4 px-8 rounded-lg hover:bg-gray-100 transition duration-300">Search</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <div id="tools" class="container mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar -->
+            <aside class="lg:col-span-1 bg-white p-6 rounded-lg shadow-md h-fit lg:sticky top-28">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Filters</h3>
+                    <button id="clear-all-btn" class="text-sm text-blue-600 hover:underline">Clear all</button>
+                </div>
+                <div class="space-y-4">
+                    <div id="my-tools-filter" class="hidden">
+                        <details open>
+                            <summary class="font-semibold cursor-pointer py-2">My Tools</summary>
+                            <ul id="my-tools-list" class="space-y-2 pt-2">
+                                <li><a href="#" class="category-link block px-4 py-2 rounded-lg hover:bg-gray-100 text-sm" data-category="saved">My Saved Tools</a></li>
+                            </ul>
+                        </details>
+                    </div>
+                    <details open>
+                        <summary class="font-semibold cursor-pointer py-2">Categories</summary>
+                        <ul id="category-list" class="space-y-2 pt-2">
+                            <li><a href="#" class="category-link active block px-4 py-2 rounded-lg hover:bg-gray-100 text-sm" data-category="all">All Categories</a></li>
+                            <li><a href="#" class="category-link block px-4 py-2 rounded-lg hover:bg-gray-100 text-sm" data-category="Customer Service & Engagement">Customer Service</a></li>
+                            <li><a href="#" class="category-link block px-4 py-2 rounded-lg hover:bg-gray-100 text-sm" data-category="Marketing & Content Creation">Marketing & Content</a></li>
+                            <li><a href="#" class="category-link block px-4 py-2 rounded-lg hover:bg-gray-100 text-sm" data-category="Operational Efficiency">Operational Efficiency</a></li>
+                            <li><a href="#" class="category-link block px-4 py-2 rounded-lg hover:bg-gray-100 text-sm" data-category="Revenue Management">Revenue Management</a></li>
+                            <li><a href="#" class="category-link block px-4 py-2 rounded-lg hover:bg-gray-100 text-sm" data-category="Data Analysis & Insights">Data & Insights</a></li>
+                        </ul>
+                    </details>
+                    <details>
+                        <summary class="font-semibold cursor-pointer py-2">Features</summary>
+                        <div id="features-filter-list" class="space-y-2 pt-2 pl-2"></div>
+                    </details>
+                    <details>
+                        <summary class="font-semibold cursor-pointer py-2">Pricing</summary>
+                        <div id="pricing-filter-list" class="space-y-2 pt-2 pl-2"></div>
+                    </details>
+                    <details>
+                        <summary class="font-semibold cursor-pointer py-2">Best For</summary>
+                        <div id="bestfor-filter-list" class="space-y-2 pt-2 pl-2"></div>
+                    </details>
+                </div>
+            </aside>
+
+            <!-- Tools Grid View -->
+            <main id="tools-grid-view" class="lg:col-span-3">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div id="search-results-info" class="text-lg text-gray-600 w-full"></div>
+                    <div class="flex items-center gap-4 w-full sm:w-auto">
+                         <select id="sort-by" class="p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <option value="relevance">Sort by Relevance</option>
+                            <option value="upvotes_desc">Upvotes (High to Low)</option>
+                            <option value="upvotes_asc">Upvotes (Low to High)</option>
+                        </select>
+                        <button id="clear-search-btn" class="text-blue-600 hover:underline font-semibold hidden whitespace-nowrap">Clear search</button>
+                    </div>
+                </div>
+                <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                    <!-- Tools will be dynamically inserted here by JavaScript -->
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Tool Detail View (hidden by default) -->
+    <main id="tool-detail-view" class="container mx-auto px-6 py-12 hidden">
+        <div class="mb-8">
+            <button id="back-to-tools-btn" class="text-blue-600 hover:underline font-semibold">&larr; Back to all tools</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            <!-- Left Column -->
+            <div class="md:col-span-2 bg-white p-8 rounded-lg shadow-md">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center mb-6">
+                    <img id="detail-icon" src="" alt="Tool Icon" class="w-20 h-20 mr-6 rounded-lg mb-4 sm:mb-0">
+                    <div class="flex-grow">
+                        <h2 id="detail-name" class="text-3xl lg:text-4xl font-bold">Tool Name</h2>
+                        <p id="detail-category" class="text-gray-500 text-lg">Category</p>
+                    </div>
+                    <button class="save-btn-detail p-2 rounded-full hover:bg-red-100">
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                    </button>
+                </div>
+                <h3 class="text-2xl font-semibold mb-3 border-b pb-2">Details</h3>
+                <p id="detail-description" class="text-gray-700 mb-8 text-base leading-relaxed">Full tool description goes here.</p>
+                <h3 class="text-2xl font-semibold mb-3 border-b pb-2">Features</h3>
+                <div id="detail-features" class="flex flex-wrap gap-3">
+                    <!-- Feature tags will be inserted here -->
+                </div>
+            </div>
+            <!-- Right Column -->
+            <div class="md:col-span-1">
+                <div class="bg-white p-6 rounded-lg shadow-md sticky top-28">
+                    <a id="detail-website-link" href="#" target="_blank" class="block w-full text-center bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition duration-300 mb-6 font-semibold">Visit Website</a>
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <h4 class="font-semibold text-gray-500 uppercase tracking-wider">Founded</h4>
+                            <p id="detail-founded" class="text-gray-800 text-base">N/A</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-500 uppercase tracking-wider">HQ</h4>
+                            <p id="detail-hq" class="text-gray-800 text-base">N/A</p>
+                        </div>
+                         <div>
+                            <h4 class="font-semibold text-gray-500 uppercase tracking-wider">Upvotes</h4>
+                            <p id="detail-upvotes" class="text-gray-800 text-base font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="signup-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative">
+             <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
+            <form id="signup-form">
+                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-4" required>
+                <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
+                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Create Account</button>
+            </form>
+        </div>
+    </div>
+    <div id="login-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative">
+            <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            <h2 class="text-2xl font-bold mb-4">Login</h2>
+            <form id="login-form">
+                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-4" required>
+                <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
+                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 AI Tools for Tourism. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const toolsData = [
+            // Marketing & Content Creation
+            { id: 1, name: "ChatGPT (OpenAI)", category: "Marketing & Content Creation", description: "A powerful generative AI model that creates human-like text for a wide range of applications, including blog posts, social media updates, email newsletters, and detailed property descriptions. Essential for content scaling.", icon: "https://placehold.co/80x80/74AA9C/ffffff?text=GPT", upvotes: 5231, website: "https://chat.openai.com", founded: 2022, hq: "San Francisco, USA", features: ["Content Generation", "Summarization", "Translation", "Brainstorming", "API Access"], pricing: "Freemium", bestFor: ["Individuals", "Small Businesses", "Enterprises"] },
+            { id: 2, name: "Midjourney", category: "Marketing & Content Creation", description: "Generates high-quality, unique images from text prompts. Ideal for creating aspirational marketing materials, social media visuals, and conceptual destination art without needing a photoshoot.", icon: "https://placehold.co/80x80/1E2E47/ffffff?text=MJ", upvotes: 4892, website: "https://www.midjourney.com", founded: 2022, hq: "San Francisco, USA", features: ["Text-to-Image", "Artistic Styles", "Image Upscaling", "High-Resolution"], pricing: "Paid", bestFor: ["Individuals", "Designers"] },
+            { id: 71, name: "Notion AI", category: "Marketing & Content Creation", description: "An AI assistant integrated directly within the Notion workspace. Helps teams write, brainstorm, edit, and summarize marketing plans, press releases, and internal documentation.", icon: "https://placehold.co/80x80/000000/ffffff?text=N", upvotes: 4300, website: "https://www.notion.so/product/ai", founded: 2022, hq: "San Francisco, USA", features: ["Writing & Editing", "Summarization", "Action Items", "Brainstorming"], pricing: "Freemium", bestFor: ["Individuals", "Small Businesses"] },
+            { id: 84, name: "Grammarly", category: "Marketing & Content Creation", description: "An AI-powered writing assistant that checks and improves grammar, style, tone, and clarity across all professional communications, ensuring brand consistency.", icon: "https://placehold.co/80x80/14A867/ffffff?text=G", upvotes: 4400, website: "https://www.grammarly.com", founded: 2009, hq: "San Francisco, USA", features: ["Grammar Check", "Style Guide", "Tone Detection", "Plagiarism Checker"], pricing: "Freemium", bestFor: ["Individuals", "Small Businesses", "Enterprises"] },
+            { id: 15, name: "HubSpot", category: "Marketing & Content Creation", description: "A comprehensive CRM platform with AI-powered tools for email marketing automation, content strategy, and predictive lead scoring to identify high-value prospects.", icon: "https://placehold.co/80x80/FF7A59/ffffff?text=HS", upvotes: 4100, website: "https://www.hubspot.com", founded: 2006, hq: "Cambridge, USA", features: ["CRM", "Email Marketing", "AI Content Assistant", "Lead Scoring"], pricing: "Freemium", bestFor: ["Small Businesses", "Enterprises"] },
+            { id: 16, name: "Mailchimp", category: "Marketing & Content Creation", description: "An email marketing platform that uses AI to optimize campaigns, predict customer demographics, generate subject lines, and determine the best time to send emails.", icon: "https://placehold.co/80x80/FFE01B/000000?text=MC", upvotes: 3900, website: "https://mailchimp.com", founded: 2001, hq: "Atlanta, USA", features: ["Email Automation", "Predictive Segmentation", "Content Optimizer"], pricing: "Freemium", bestFor: ["Small Businesses"] },
+            { id: 5, name: "HeyGen", category: "Marketing & Content Creation", description: "An AI video platform that creates professional videos with realistic avatars and voiceovers from text. Perfect for creating promotional content and tutorials at scale.", icon: "https://placehold.co/80x80/5E4AE8/ffffff?text=HG", upvotes: 3987, website: "https://www.heygen.com", founded: 2020, hq: "Los Angeles, USA", features: ["AI Avatars", "Text-to-Video", "Voice Cloning", "Video Translation"], pricing: "Freemium", bestFor: ["Small Businesses", "Marketers"] },
+            { id: 82, name: "ElevenLabs", category: "Marketing & Content Creation", description: "Generative voice AI that creates natural, human-like voiceovers for videos, podcasts, and virtual assistants in multiple languages and accents.", icon: "https://placehold.co/80x80/1E222D/ffffff?text=EL", upvotes: 3800, website: "https://elevenlabs.io", founded: 2022, hq: "London, UK", features: ["Text-to-Speech", "Voice Cloning", "Multilingual", "API Access"], pricing: "Freemium", bestFor: ["Content Creators"] },
+            { id: 101, name: "Bynder", category: "Marketing & Content Creation", description: "A digital asset management (DAM) platform that uses AI to automatically tag, organize, and manage large libraries of photos, videos, and marketing materials.", icon: "https://placehold.co/80x80/00BFFF/ffffff?text=B", upvotes: 2200, website: "https://www.bynder.com", founded: 2013, hq: "Amsterdam, Netherlands", features: ["AI Auto-Tagging", "Content Workflow", "Brand Templates"], pricing: "Paid", bestFor: ["Enterprises"] },
+
+            // Data Analysis & Insights
+            { id: 11, name: "Google Gemini", category: "Data Analysis & Insights", description: "Google's most capable multimodal AI model, ideal for analyzing complex market trends, summarizing customer feedback from various sources, and generating strategic insights.", icon: "https://placehold.co/80x80/8E44AD/ffffff?text=G", upvotes: 4950, website: "https://gemini.google.com", founded: 2023, hq: "Mountain View, USA", features: ["Multimodal Analysis", "Advanced Reasoning", "Data Interpretation"], pricing: "Free", bestFor: ["Individuals", "Researchers"] },
+            { id: 92, name: "Perplexity AI", category: "Data Analysis & Insights", description: "A conversational AI search engine that provides direct, cited answers to complex questions, making it invaluable for market research and competitive analysis.", icon: "https://placehold.co/80x80/000000/ffffff?text=P", upvotes: 4000, website: "https://www.perplexity.ai", founded: 2022, hq: "San Francisco, USA", features: ["Conversational Search", "Source Citations", "Academic Research"], pricing: "Freemium", bestFor: ["Individuals", "Researchers"] },
+            { id: 12, name: "Tableau", category: "Data Analysis & Insights", description: "An AI-powered data visualization platform that helps businesses understand guest demographics, booking trends, and operational data through interactive dashboards.", icon: "https://placehold.co/80x80/E97627/ffffff?text=T", upvotes: 3800, website: "https://www.tableau.com", founded: 2003, hq: "Seattle, USA", features: ["Data Visualization", "Interactive Dashboards", "Predictive Analytics"], pricing: "Paid", bestFor: ["Enterprises", "Data Analysts"] },
+            { id: 13, name: "Power BI", category: "Data Analysis & Insights", description: "Microsoft's business analytics service for creating interactive data visualizations and business intelligence reports from various data sources.", icon: "https://placehold.co/80x80/F2C811/000000?text=BI", upvotes: 3750, website: "https://powerbi.microsoft.com", founded: 2011, hq: "Redmond, USA", features: ["Business Intelligence", "Reporting", "Data Modeling"], pricing: "Freemium", bestFor: ["Enterprises", "Data Analysts"] },
+            { id: 87, name: "Salesforce Einstein", category: "Data Analysis & Insights", description: "AI technology embedded within the Salesforce platform that delivers predictions and recommendations based on your company's CRM data.", icon: "https://placehold.co/80x80/00A1E0/ffffff?text=SE", upvotes: 3300, website: "https://www.salesforce.com/products/einstein/", founded: 2016, hq: "San Francisco, USA", features: ["Predictive Scoring", "Recommendations", "Automated Insights"], pricing: "Paid", bestFor: ["Enterprises"] },
+            { id: 102, name: "Brandwatch", category: "Data Analysis & Insights", description: "An AI-powered market research and consumer intelligence tool that analyzes social media conversations, reviews, and news to identify emerging trends and brand sentiment.", icon: "https://placehold.co/80x80/1E90FF/ffffff?text=B", upvotes: 2650, website: "https://www.brandwatch.com", founded: 2007, hq: "Brighton, UK", features: ["Social Listening", "Trend Analysis", "Sentiment Analysis"], pricing: "Paid", bestFor: ["Enterprises", "Marketers"] },
+            { id: 103, name: "Placer.ai", category: "Data Analysis & Insights", description: "An AI-powered geospatial analytics platform that provides insights into visitor behavior and foot traffic at any location, crucial for attractions and hospitality.", icon: "https://placehold.co/80x80/4682B4/ffffff?text=P", upvotes: 2350, website: "https://www.placer.ai", founded: 2016, hq: "Los Gatos, USA", features: ["Location Analytics", "Foot Traffic Data", "Visitor Demographics"], pricing: "Paid", bestFor: ["Enterprises", "Real Estate"] },
+
+            // Operational Efficiency
+            { id: 100, name: "GitHub Copilot", category: "Operational Efficiency", description: "An AI pair programmer that helps in-house developers build internal tools, websites, and integrations faster by suggesting code and entire functions. Useful for creating a booking portal.", icon: "https://placehold.co/80x80/171515/ffffff?text=GH", upvotes: 4250, website: "https://github.com/features/copilot", founded: 2021, hq: "San Francisco, USA", features: ["Code Completion", "AI Chat", "Language Translation", "Booking Portal Development"], pricing: "Paid", bestFor: ["Developers"] },
+            { id: 72, name: "Slack AI", category: "Operational Efficiency", description: "AI features built into Slack that summarize long channels and threads, helping teams catch up quickly and find answers within their internal communications.", icon: "https://placehold.co/80x80/4A154B/ffffff?text=S", upvotes: 4150, website: "https://slack.com/features/ai", founded: 2023, hq: "San Francisco, USA", features: ["Channel Recaps", "Thread Summaries", "AI-Powered Search"], pricing: "Paid", bestFor: ["Small Businesses", "Enterprises"] },
+            { id: 76, name: "Zoom IQ", category: "Operational Efficiency", description: "An AI companion for Zoom that provides intelligent meeting summaries, identifies action items, and offers insights to improve sales calls and team collaboration. Can transcribe meetings.", icon: "https://placehold.co/80x80/2D8CFF/ffffff?text=Z", upvotes: 3600, website: "https://zoom.us/en/products/zoom-iq-for-sales/", founded: 2022, hq: "San Jose, USA", features: ["Meeting Summaries", "Action Items", "Conversation Analysis", "Transcribe", "Zoom"], pricing: "Paid", bestFor: ["Sales Teams", "Enterprises"] },
+            { id: 94, name: "ClickUp", category: "Operational Efficiency", description: "A project management platform with an integrated AI assistant to automate tasks, summarize documents, generate ideas, and improve team productivity.", icon: "https://placehold.co/80x80/7B68EE/ffffff?text=CU", upvotes: 3100, website: "https://clickup.com/ai", founded: 2017, hq: "San Diego, USA", features: ["Task Automation", "AI Project Management", "Content Generation"], pricing: "Freemium", bestFor: ["Small Businesses", "Enterprises"] },
+            { id: 73, name: "Fireflies.ai", category: "Operational Efficiency", description: "An AI assistant that joins your meetings to transcribe, summarize, and analyze voice conversations, ensuring no detail from client calls or team meetings is lost.", icon: "https://placehold.co/80x80/FF3D00/ffffff?text=F", upvotes: 2900, website: "https://fireflies.ai", founded: 2016, hq: "San Francisco, USA", features: ["Transcription", "Meeting Summaries", "Conversation Analytics", "Transcribe"], pricing: "Freemium", bestFor: ["Individuals", "Small Businesses"] },
+            { id: 51, name: "Amadeus", category: "Operational Efficiency", description: "A leading GDS and technology provider offering a suite of IT solutions, including booking systems and transaction processing, for the global travel industry. Can be used for ferry booking portals.", icon: "https://placehold.co/80x80/d35400/ffffff?text=A", upvotes: 2600, website: "https://amadeus.com", founded: 1987, hq: "Madrid, Spain", features: ["GDS", "Airline IT Solutions", "Hospitality Solutions", "Booking Systems", "Online Booking Portal", "Ferry"], pricing: "Paid", bestFor: ["Enterprises"] },
+            { id: 54, name: "Navan (formerly TripActions)", category: "Operational Efficiency", description: "An AI-powered corporate travel and expense management platform that streamlines booking, payments, and reporting for business travel.", icon: "https://placehold.co/80x80/e74c3c/ffffff?text=N", upvotes: 2350, website: "https://navan.com", founded: 2015, hq: "Palo Alto, USA", features: ["Corporate Travel", "Expense Management", "AI Recommendations"], pricing: "Paid", bestFor: ["Enterprises"] },
+            { id: 40, name: "Travefy", category: "Operational Efficiency", description: "An itinerary management and client communication tool for travel agents and tour operators that simplifies the creation and sharing of professional travel plans.", icon: "https://placehold.co/80x80/2ecc71/ffffff?text=TF", upvotes: 1480, website: "https://travefy.com", founded: 2012, hq: "Lincoln, USA", features: ["Itinerary Builder", "Client Management", "Proposals"], pricing: "Paid", bestFor: ["Travel Agents"] },
+            { id: 104, name: "Winnow", category: "Operational Efficiency", description: "An AI-powered system for commercial kitchens that tracks and analyzes food waste, helping hotels and restaurants cut costs and improve sustainability.", icon: "https://placehold.co/80x80/32CD32/ffffff?text=W", upvotes: 1420, website: "https://www.winnowsolutions.com", founded: 2013, hq: "London, UK", features: ["Food Waste Tracking", "Analytics", "Cost Reduction"], pricing: "Paid", bestFor: ["Restaurants", "Hotels"] },
+            { id: 105, name: "BagsID", category: "Operational Efficiency", description: "An AI-driven baggage handling solution that uses computer vision to identify and track luggage without the need for paper tags, reducing errors and improving efficiency.", icon: "https://placehold.co/80x80/6A5ACD/ffffff?text=BID", upvotes: 1380, website: "https://www.bagsid.com", founded: 2020, hq: "Amsterdam, Netherlands", features: ["Computer Vision", "Baggage Tracking", "Tagless Recognition"], pricing: "Paid", bestFor: ["Airlines", "Airports"] },
+            { id: 61, name: "Mews", category: "Operational Efficiency", description: "A modern, cloud-based property management system (PMS) for hotels and hostels that automates operations from bookings to check-out. Can be adapted for other booking needs.", icon: "https://placehold.co/80x80/34495e/ffffff?text=M", upvotes: 1150, website: "https://www.mews.com", founded: 2012, hq: "Prague, Czech Republic", features: ["Cloud PMS", "Online Check-in", "Automation", "Booking Engine"], pricing: "Paid", bestFor: ["Hotels"] },
+            
+            // Customer Service & Engagement
+            { id: 43, name: "Intercom", category: "Customer Service & Engagement", description: "A customer communications platform that uses AI chatbots and shared inboxes to provide personalized, real-time support and engagement across multiple channels.", icon: "https://placehold.co/80x80/1F8DED/ffffff?text=I", upvotes: 3200, website: "https://www.intercom.com", founded: 2011, hq: "San Francisco, USA", features: ["AI Chatbots", "Live Chat", "Proactive Messaging", "Help Center"], pricing: "Paid", bestFor: ["Small Businesses", "Enterprises"] },
+            { id: 44, name: "Zendesk", category: "Customer Service & Engagement", description: "A comprehensive customer service suite with an AI-powered Answer Bot that resolves common queries instantly, freeing up human agents for more complex issues.", icon: "https://placehold.co/80x80/03363D/ffffff?text=Z", upvotes: 3150, website: "https://www.zendesk.com", founded: 2007, hq: "San Francisco, USA", features: ["Ticketing System", "AI Answer Bot", "Help Center", "Analytics"], pricing: "Paid", bestFor: ["Enterprises"] },
+            { id: 85, name: "Drift", category: "Customer Service & Engagement", description: "A conversational marketing and sales platform that uses AI-powered chatbots to engage website visitors, qualify leads, and book meetings 24/7.", icon: "https://placehold.co/80x80/00A86B/ffffff?text=D", upvotes: 2600, website: "https://www.drift.com", founded: 2015, hq: "Boston, USA", features: ["Conversational AI", "Lead Qualification", "Meeting Booking"], pricing: "Paid", bestFor: ["Sales Teams", "Marketers"] },
+            { id: 45, name: "Ada", category: "Customer Service & Engagement", description: "An AI-native platform for automated customer experience (ACX) that provides personalized, automated support across chat, messaging, and voice channels.", icon: "https://placehold.co/80x80/7f8c8d/ffffff?text=A", upvotes: 2300, website: "https://www.ada.cx", founded: 2016, hq: "Toronto, Canada", features: ["AI Chatbot", "Personalization", "No-Code Platform"], pricing: "Paid", bestFor: ["Enterprises"] },
+            { id: 106, name: "GuideGeek", category: "Customer Service & Engagement", description: "An AI travel assistant that provides instant, personalized travel recommendations and support, useful as a tool for agents to quickly source information for clients.", icon: "https://placehold.co/80x80/FF8C00/ffffff?text=GG", upvotes: 2150, website: "https://guidegeek.com/", founded: 2023, hq: "Remote", features: ["Travel Recommendations", "Itinerary Ideas", "Instant Support"], pricing: "Free", bestFor: ["Travel Agents", "Individuals"] },
+            { id: 107, name: "Tawk.to", category: "Customer Service & Engagement", description: "Live chat software with AI features to assist agents and answer common questions.", icon: "https://placehold.co/80x80/00BFFF/ffffff?text=T", upvotes: 2050, website: "https://www.tawk.to", founded: 2012, hq: "Las Vegas, USA", features: ["Live Chat", "Knowledge Base", "Ticketing", "AI Assist"], pricing: "Free", bestFor: ["Small Businesses"] },
+            { id: 108, name: "Brand24", category: "Customer Service & Engagement", description: "Sentiment Analysis Tool that analyzes customer feedback and online reviews.", icon: "https://placehold.co/80x80/FFA500/ffffff?text=B24", upvotes: 1950, website: "https://brand24.com", founded: 2011, hq: "Wrocław, Poland", features: ["Sentiment Analysis", "Social Listening", "Mention Tracking"], pricing: "Paid", bestFor: ["Marketers", "Enterprises"] },
+            
+            // Revenue Management
+            { id: 109, name: "IDeaS Revenue Solutions", category: "Revenue Management", description: "Automated revenue management system for hotels to optimize pricing and occupancy.", icon: "https://placehold.co/80x80/B22222/ffffff?text=ID", upvotes: 2850, website: "https://ideas.com", founded: 1989, hq: "Bloomington, USA", features: ["Dynamic Pricing", "Revenue Management", "Forecasting"], pricing: "Paid", bestFor: ["Hotels", "Enterprises"] },
+            { id: 110, name: "Pricepoint", category: "Revenue Management", description: "Dynamic pricing software that analyzes demand and competition to adjust rates.", icon: "https://placehold.co/80x80/4169E1/ffffff?text=P", upvotes: 2750, website: "https://www.pricepoint.co", founded: 2014, hq: "Milan, Italy", features: ["Dynamic Pricing", "Competitor Analysis", "Market Insights"], pricing: "Paid", bestFor: ["Hotels"] },
+            { id: 111, name: "Atomize", category: "Revenue Management", description: "Real-time price automation for hotels to maximize revenue.", icon: "https://placehold.co/80x80/8A2BE2/ffffff?text=A", upvotes: 2650, website: "https://atomize.com", founded: 2017, hq: "Gothenburg, Sweden", features: ["Real-time Pricing", "Demand Forecasting", "Group Bookings"], pricing: "Paid", bestFor: ["Hotels"] },
+            { id: 59, name: "RoomPriceGenie", category: "Revenue Management", description: "Automated dynamic pricing tool for independent hotels.", icon: "https://placehold.co/80x80/2ecc71/ffffff?text=RPG", upvotes: 1250, website: "https://www.roompricegenie.com", founded: 2017, hq: "Zug, Switzerland", features: ["Automated Pricing", "Easy Setup", "Market Data"], pricing: "Paid", bestFor: ["Hotels", "Small Businesses"] },
+            { id: 60, name: "Revinate", category: "Revenue Management", description: "Guest data platform and marketing automation for hotels to drive direct revenue.", icon: "https://placehold.co/80x80/f1c40f/ffffff?text=R", upvotes: 1200, website: "https://www.revinate.com", founded: 2009, hq: "San Francisco, USA", features: ["Guest CRM", "Email Marketing", "Upselling"], pricing: "Paid", bestFor: ["Hotels"] },
+        ];
+        
+        const useCases = [
+            "e.g., Generate a blog post about sustainable travel",
+            "e.g., Create a promotional video for a new hotel",
+            "e.g., Analyze customer reviews for sentiment",
+            "e.g., Find a tool to manage social media scheduling",
+            "e.g., I need a chatbot for my website",
+            "e.g., Optimize hotel room pricing for next season",
+            "e.g., Create personalized email marketing campaigns",
+            "e.g., Transcribe meeting notes automatically",
+            "e.g., Find a CRM for a small tour company",
+            "e.g., Generate realistic images for a new travel package",
+            "e.g., Automate expense reporting for business travel",
+            "e.g., Build a simple booking engine",
+            "e.g., Analyze foot traffic for a new restaurant location",
+            "e.g., Create voiceovers for marketing videos",
+            "e.g., I need a tool for dynamic pricing",
+            "e.g., Help me write ad copy",
+            "e.g., Find a system to track baggage",
+            "e.g., I need to manage our company's digital assets",
+            "e.g., Forecast travel demand for the holidays",
+            "e.g., Create a professional presentation quickly"
+        ];
+
+        let activeFilters = {
+            category: 'all',
+            pricing: new Set(),
+            bestFor: new Set(),
+            features: new Set()
+        };
+        let currentUser = null;
+        const upvotedTools = new Set();
+        let placeholderInterval;
+
+        const toolsGrid = document.getElementById('tools-grid');
+        const categoryList = document.getElementById('category-list');
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const searchResultsInfo = document.getElementById('search-results-info');
+        const clearSearchBtn = document.getElementById('clear-search-btn');
+        const clearAllBtn = document.getElementById('clear-all-btn');
+        const sortBy = document.getElementById('sort-by');
+        
+        const toolsGridView = document.getElementById('tools-grid-view');
+        const toolDetailView = document.getElementById('tool-detail-view');
+        const mainContentArea = document.getElementById('tools');
+        const backToToolsBtn = document.getElementById('back-to-tools-btn');
+        
+        // Auth elements
+        const authLinks = document.getElementById('auth-links');
+        const userSession = document.getElementById('user-session');
+        const welcomeMsg = document.getElementById('welcome-msg');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const signupModal = document.getElementById('signup-modal');
+        const loginModal = document.getElementById('login-modal');
+        const signupForm = document.getElementById('signup-form');
+        const loginForm = document.getElementById('login-form');
+        const myToolsFilter = document.getElementById('my-tools-filter');
+
+        // Detail page elements
+        const detailIcon = document.getElementById('detail-icon');
+        const detailName = document.getElementById('detail-name');
+        const detailCategory = document.getElementById('detail-category');
+        const detailDescription = document.getElementById('detail-description');
+        const detailFeatures = document.getElementById('detail-features');
+        const detailWebsiteLink = document.getElementById('detail-website-link');
+        const detailFounded = document.getElementById('detail-founded');
+        const detailHq = document.getElementById('detail-hq');
+        const detailUpvotes = document.getElementById('detail-upvotes');
+
+        function standardizeData() {
+            const featureMap = {
+                'ai chatbots': 'AI Chatbot', 'ai chatbot': 'AI Chatbot', 'conversational ai': 'AI Chatbot', 'ai chat': 'AI Chatbot', 'ai answer bot': 'AI Chatbot',
+                'transcription': 'Transcription', 'transcribe': 'Transcription',
+                'summarization': 'Summarization', 'meeting summaries': 'Summarization', 'channel recaps': 'Summarization', 'thread summaries': 'Summarization',
+                'content generation': 'Content Generation', 'ai writer': 'Content Generation', 'writing & editing': 'Content Generation', 'ai content assistant': 'Content Generation',
+                'booking systems': 'Booking Engine', 'booking engine': 'Booking Engine', 'online booking portal': 'Booking Engine', 'booking portal development': 'Booking Engine',
+                'dynamic pricing': 'Dynamic Pricing', 'real-time pricing': 'Dynamic Pricing', 'automated pricing': 'Dynamic Pricing',
+                'text-to-video': 'Text-to-Video', 'generative video': 'Text-to-Video',
+                'analytics': 'Analytics', 'business intelligence': 'Analytics',
+                'crm': 'CRM', 'guest crm': 'CRM',
+            };
+
+            toolsData.forEach(tool => {
+                if (tool.features) {
+                    const standardized = new Set(tool.features.map(f => {
+                        const lowerF = f.toLowerCase();
+                        return featureMap[lowerF] || f;
+                    }));
+                    tool.features = [...standardized];
+                }
+            });
+        }
+
+        function createFilterCheckboxes(filterType, containerId) {
+            const container = document.getElementById(containerId);
+            const uniqueValues = [...new Set(toolsData.flatMap(tool => tool[filterType] || []))];
+            uniqueValues.sort();
+            
+            container.innerHTML = uniqueValues.map(value => `
+                <label class="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" class="filter-checkbox rounded" data-filter-type="${filterType}" value="${value}">
+                    <span>${value}</span>
+                </label>
+            `).join('');
+        }
+
+        const displayTools = (tools) => {
+            toolsGrid.innerHTML = '';
+            if (tools.length === 0) {
+                toolsGrid.innerHTML = `<p class="col-span-full text-center text-gray-500">No tools found matching your criteria.</p>`;
+            } else {
+                tools.forEach(tool => {
+                    const shortDesc = tool.description.split('. ')[0] + '.';
+                    const isUpvoted = upvotedTools.has(tool.id);
+                    const isSaved = currentUser && currentUser.savedTools.has(tool.id);
+                    const toolCard = `
+                        <div class="tool-card bg-white rounded-lg shadow-md p-6 text-center" data-category="${tool.category}" data-id="${tool.id}">
+                             <button class="save-btn absolute top-2 right-2 p-2 rounded-full hover:bg-red-100 ${isSaved ? 'saved' : ''}" data-tool-id="${tool.id}">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                            </button>
+                            <img src="${tool.icon}" alt="${tool.name} Icon" class="w-20 h-20 mb-4 rounded-full mx-auto" onerror="this.onerror=null;this.src='https.placehold.co/80x80/cccccc/ffffff?text=Error';">
+                            <h3 class="text-xl font-bold mb-2">${tool.name}</h3>
+                            <p class="text-gray-600 mb-4 flex-grow">${shortDesc}</p>
+                            <div class="mt-auto flex justify-between items-center w-full">
+                                <button class="learn-more-btn bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 text-sm flex-grow mr-2">Learn More</button>
+                                <button class="upvote-btn border border-gray-300 rounded-full px-4 py-2 flex items-center justify-center hover:bg-gray-100 transition duration-300 ${isUpvoted ? 'upvoted' : ''}" data-tool-id="${tool.id}">
+                                    <svg class="w-4 h-4 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+                                    <span class="font-bold text-gray-800 upvote-count">${tool.upvotes}</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    toolsGrid.innerHTML += toolCard;
+                });
+            }
+        };
+
+        const performSearchAndFilter = () => {
+            const searchQuery = searchInput.value.toLowerCase().trim();
+            let filteredTools = [...toolsData];
+
+            // 1. Apply all sidebar filters
+            if (activeFilters.category === 'saved') {
+                if (currentUser) {
+                    filteredTools = filteredTools.filter(tool => currentUser.savedTools.has(tool.id));
+                } else {
+                    filteredTools = []; // Show no saved tools if not logged in
+                }
+            } else {
+                 if (activeFilters.category !== 'all') {
+                    filteredTools = filteredTools.filter(tool => tool.category === activeFilters.category);
+                }
+                if (activeFilters.pricing.size > 0) {
+                    filteredTools = filteredTools.filter(tool => activeFilters.pricing.has(tool.pricing));
+                }
+                if (activeFilters.bestFor.size > 0) {
+                    filteredTools = filteredTools.filter(tool => tool.bestFor && tool.bestFor.some(bf => activeFilters.bestFor.has(bf)));
+                }
+                 if (activeFilters.features.size > 0) {
+                    filteredTools = filteredTools.filter(tool => tool.features && tool.features.some(feat => activeFilters.features.has(feat)));
+                }
+            }
+            
+            // 2. Handle search query
+            if (searchQuery) {
+                const stopWords = new Set(['i', 'a', 'an', 'the', 'to', 'for', 'in', 'of', 'my', 'need', 'someone', 'build', 'create', 'and', 'with', 'how', 'can', 'get', 'is', 'are']);
+                const searchKeywords = searchQuery.replace(/[.,!?]/g, '').split(' ').filter(word => !stopWords.has(word) && word.length > 1);
+
+                if (searchKeywords.length > 0) {
+                     const scoredTools = filteredTools.map(tool => {
+                        const searchableText = [
+                            tool.name,
+                            tool.description,
+                            tool.category,
+                            ...(tool.features || [])
+                        ].join(' ').toLowerCase();
+                        
+                        let score = 0;
+                        searchKeywords.forEach(keyword => {
+                            if (searchableText.includes(keyword)) {
+                                score++;
+                            }
+                        });
+                        
+                        return { ...tool, score };
+                    });
+                    filteredTools = scoredTools.filter(tool => tool.score > 0);
+                }
+                
+                searchResultsInfo.textContent = `Showing results for "${searchInput.value}"`;
+                searchResultsInfo.classList.remove('hidden');
+                clearSearchBtn.classList.remove('hidden');
+                sortBy.value = 'relevance'; // Default to relevance on search
+            } else {
+                searchResultsInfo.classList.add('hidden');
+                clearSearchBtn.classList.add('hidden');
+                if (sortBy.value === 'relevance') {
+                    sortBy.value = 'upvotes_desc'; // Default to upvotes if no search
+                }
+            }
+            
+            // 3. Apply sorting
+            const sortOption = sortBy.value;
+            if (sortOption === 'relevance' && searchQuery && filteredTools.every(t => 'score' in t)) {
+                 filteredTools.sort((a, b) => b.score - a.score);
+            } else if (sortOption === 'upvotes_desc') {
+                filteredTools.sort((a, b) => b.upvotes - a.upvotes);
+            } else if (sortOption === 'upvotes_asc') {
+                filteredTools.sort((a, b) => a.upvotes - b.upvotes);
+            }
+            
+            displayTools(filteredTools);
+        };
+
+        function showGridView() {
+            toolDetailView.classList.add('hidden');
+            mainContentArea.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function showDetailView(toolId) {
+            const tool = toolsData.find(t => t.id === toolId);
+            if (!tool) return;
+
+            detailIcon.src = tool.icon;
+            detailName.textContent = tool.name;
+            detailCategory.textContent = tool.category;
+            detailDescription.textContent = tool.description;
+            detailWebsiteLink.href = tool.website;
+            detailFounded.textContent = tool.founded || 'N/A';
+            detailHq.textContent = tool.hq || 'N/A';
+            detailUpvotes.textContent = tool.upvotes;
+
+            const saveBtnDetail = document.querySelector('.save-btn-detail');
+            saveBtnDetail.dataset.toolId = tool.id;
+            if (currentUser && currentUser.savedTools.has(tool.id)) {
+                saveBtnDetail.classList.add('saved');
+            } else {
+                saveBtnDetail.classList.remove('saved');
+            }
+
+            detailFeatures.innerHTML = '';
+            (tool.features || []).forEach(feature => {
+                const featureEl = document.createElement('span');
+                featureEl.className = 'feature-tag-clickable bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full';
+                featureEl.textContent = feature;
+                featureEl.dataset.feature = feature;
+                detailFeatures.appendChild(featureEl);
+            });
+
+            mainContentArea.classList.add('hidden');
+            toolDetailView.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+        
+        function handleSaveClick(toolId) {
+            if (!currentUser) {
+                loginModal.classList.remove('hidden');
+                return;
+            }
+            const tool = toolsData.find(t => t.id === toolId);
+            if (tool) {
+                if (currentUser.savedTools.has(toolId)) {
+                    currentUser.savedTools.delete(toolId);
+                } else {
+                    currentUser.savedTools.add(toolId);
+                }
+                performSearchAndFilter(); // Re-render to update heart states
+                // Also update detail view if it's open
+                if (!toolDetailView.classList.contains('hidden')) {
+                    const saveBtnDetail = document.querySelector('.save-btn-detail');
+                    if (currentUser.savedTools.has(toolId)) {
+                        saveBtnDetail.classList.add('saved');
+                    } else {
+                        saveBtnDetail.classList.remove('saved');
+                    }
+                }
+            }
+        }
+
+        toolsGrid.addEventListener('click', function(e) {
+            const upvoteButton = e.target.closest('.upvote-btn');
+            const learnMoreButton = e.target.closest('.learn-more-btn');
+            const saveButton = e.target.closest('.save-btn');
+
+            if (upvoteButton) {
+                const toolId = parseInt(upvoteButton.dataset.toolId, 10);
+                if (!upvotedTools.has(toolId)) {
+                    const tool = toolsData.find(t => t.id === toolId);
+                    if (tool) {
+                        tool.upvotes++;
+                        upvotedTools.add(toolId);
+                        performSearchAndFilter();
+                    }
+                }
+            } else if (learnMoreButton) {
+                const toolCard = learnMoreButton.closest('.tool-card');
+                const toolId = parseInt(toolCard.dataset.id, 10);
+                showDetailView(toolId);
+            } else if (saveButton) {
+                const toolId = parseInt(saveButton.dataset.toolId, 10);
+                handleSaveClick(toolId);
+            }
+        });
+
+        document.querySelector('.save-btn-detail').addEventListener('click', function(e){
+            const toolId = parseInt(e.currentTarget.dataset.toolId, 10);
+            handleSaveClick(toolId);
+        });
+
+        document.getElementById('my-tools-list').addEventListener('click', function(e) {
+            e.preventDefault();
+            const link = e.target.closest('.category-link');
+            if (link) {
+                document.querySelectorAll('#category-list .category-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                activeFilters.category = link.dataset.category;
+                performSearchAndFilter();
+            }
+        });
+
+        categoryList.addEventListener('click', function(e) {
+            e.preventDefault();
+            const link = e.target.closest('.category-link');
+            if (link) {
+                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                activeFilters.category = link.dataset.category;
+                performSearchAndFilter();
+            }
+        });
+        
+        document.getElementById('features-filter-list').addEventListener('change', (e) => {
+            if (e.target.classList.contains('filter-checkbox')) {
+                const { value, checked } = e.target;
+                if (checked) {
+                    activeFilters.features.add(value);
+                } else {
+                    activeFilters.features.delete(value);
+                }
+                performSearchAndFilter();
+            }
+        });
+
+        document.querySelector('#pricing-filter-list').addEventListener('change', (e) => {
+            if (e.target.classList.contains('filter-checkbox')) {
+                const { value, checked } = e.target;
+                if (checked) {
+                    activeFilters.pricing.add(value);
+                } else {
+                    activeFilters.pricing.delete(value);
+                }
+                performSearchAndFilter();
+            }
+        });
+
+        document.querySelector('#bestfor-filter-list').addEventListener('change', (e) => {
+            if (e.target.classList.contains('filter-checkbox')) {
+                const { value, checked } = e.target;
+                if (checked) {
+                    activeFilters.bestFor.add(value);
+                } else {
+                    activeFilters.bestFor.delete(value);
+                }
+                performSearchAndFilter();
+            }
+        });
+
+        clearAllBtn.addEventListener('click', () => {
+             // Reset search
+            searchInput.value = '';
+            // Reset category
+            document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+            document.querySelector('.category-link[data-category="all"]').classList.add('active');
+            activeFilters.category = 'all';
+            // Reset checkboxes
+            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+            activeFilters.pricing.clear();
+            activeFilters.bestFor.clear();
+            activeFilters.features.clear();
+            // Reset sort
+            sortBy.value = 'upvotes_desc';
+            // Rerun filter
+            performSearchAndFilter();
+        });
+
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            performSearchAndFilter();
+        });
+
+        backToToolsBtn.addEventListener('click', showGridView);
+        searchBtn.addEventListener('click', performSearchAndFilter);
+        sortBy.addEventListener('change', performSearchAndFilter);
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                performSearchAndFilter();
+            }
+        });
+
+        // Clickable features on detail page
+        detailFeatures.addEventListener('click', (e) => {
+            if (e.target.classList.contains('feature-tag-clickable')) {
+                const feature = e.target.dataset.feature;
+                // Clear all filters first
+                clearAllBtn.click();
+                // Check the corresponding feature checkbox
+                const featureCheckbox = document.querySelector(`#features-filter-list input[value="${feature}"]`);
+                if (featureCheckbox) {
+                    featureCheckbox.checked = true;
+                    activeFilters.features.add(feature);
+                }
+                showGridView();
+                performSearchAndFilter();
+            }
+        });
+
+        // --- Auth Logic ---
+        function updateAuthUI() {
+            if (currentUser) {
+                authLinks.classList.add('hidden');
+                userSession.classList.remove('hidden');
+                myToolsFilter.classList.remove('hidden');
+                welcomeMsg.textContent = `Welcome, ${currentUser.email}!`;
+            } else {
+                authLinks.classList.remove('hidden');
+                userSession.classList.add('hidden');
+                myToolsFilter.classList.add('hidden');
+            }
+            performSearchAndFilter(); // Re-render tools to show correct saved state
+        }
+
+        function closeModal(modal) {
+            modal.classList.add('hidden');
+        }
+
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.classList.remove('hidden');
+        });
+
+        signupBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupModal.classList.remove('hidden');
+        });
+
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentUser = null;
+            // When logging out, also clear the saved tools filter if it's active
+            if (activeFilters.category === 'saved') {
+                clearAllBtn.click();
+            }
+            updateAuthUI();
+        });
+
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = e.target.elements[0].value;
+            // In a real app, you would also handle the password securely
+            currentUser = { email, savedTools: new Set() };
+            updateAuthUI();
+            closeModal(signupModal);
+            e.target.reset();
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = e.target.elements[0].value;
+            // In a real app, you would validate credentials
+            currentUser = { email, savedTools: new Set() };
+            updateAuthUI();
+            closeModal(loginModal);
+            e.target.reset();
+        });
+
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal || e.target.classList.contains('close-modal-btn')) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        // --- Dynamic Placeholder Logic ---
+        function updateDynamicPlaceholder() {
+            const randomIndex = Math.floor(Math.random() * useCases.length);
+            searchInput.style.opacity = 0;
+            setTimeout(() => {
+                searchInput.placeholder = useCases[randomIndex];
+                searchInput.style.opacity = 1;
+            }, 500);
+        }
+
+        function startPlaceholderRotation() {
+            if (!placeholderInterval) {
+                placeholderInterval = setInterval(updateDynamicPlaceholder, 5000);
+            }
+        }
+
+        function stopPlaceholderRotation() {
+            clearInterval(placeholderInterval);
+            placeholderInterval = null;
+        }
+
+        searchInput.addEventListener('focus', stopPlaceholderRotation);
+        searchInput.addEventListener('blur', () => {
+            if (!searchInput.value) {
+                startPlaceholderRotation();
+            }
+        });
+
+
+        // Initial setup
+        standardizeData();
+        createFilterCheckboxes('features', 'features-filter-list');
+        createFilterCheckboxes('pricing', 'pricing-filter-list');
+        createFilterCheckboxes('bestFor', 'bestfor-filter-list');
+        showGridView();
+        performSearchAndFilter();
+        updateAuthUI();
+        startPlaceholderRotation();
+    </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
