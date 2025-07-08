@@ -127,7 +127,7 @@
                 </div>
                 <div class="space-y-4">
                     <div id="my-tools-filter" class="hidden">
-                         <details open>
+                        <details open>
                             <summary class="font-semibold cursor-pointer py-2">My Tools</summary>
                             <ul id="my-tools-list" class="space-y-2 pt-2">
                                 <li><a href="#" class="category-link block px-4 py-2 rounded-lg hover:bg-gray-100 text-sm" data-category="saved">My Favorites</a></li>
@@ -234,9 +234,8 @@
              <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
             <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
             <form id="signup-form">
-                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
+                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-4" required>
                 <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
-                <p id="signup-error" class="text-red-500 text-sm mb-4 hidden"></p>
                 <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Create Account</button>
             </form>
         </div>
@@ -246,26 +245,9 @@
             <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
             <h2 class="text-2xl font-bold mb-4">Login</h2>
             <form id="login-form">
-                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
-                <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-2" required>
-                <div class="text-right mb-4">
-                    <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline">Forgot Password?</a>
-                </div>
-                <p id="login-error" class="text-red-500 text-sm mb-4 hidden"></p>
+                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-4" required>
+                <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
                 <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Login</button>
-            </form>
-        </div>
-    </div>
-    <div id="forgot-password-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative">
-            <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
-            <h2 class="text-2xl font-bold mb-4">Reset Password</h2>
-            <form id="forgot-password-form">
-                <p class="text-sm text-gray-600 mb-4">Enter your email address and we will send you a link to reset your password.</p>
-                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
-                <p id="forgot-password-error" class="text-red-500 text-sm mb-4 hidden"></p>
-                <p id="forgot-password-success" class="text-green-500 text-sm mb-4 hidden"></p>
-                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Send Reset Link</button>
             </form>
         </div>
     </div>
@@ -277,43 +259,7 @@
         </div>
     </footer>
 
-    <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword, 
-            signOut, 
-            onAuthStateChanged,
-            sendPasswordResetEmail
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc, 
-            setDoc, 
-            updateDoc, 
-            arrayUnion, 
-            arrayRemove 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDglW5m7u8IFBmeIZTLp8IwxBu5cbvC2s4",
-            authDomain: "ai-tools-for-tourism.firebaseapp.com",
-            projectId: "ai-tools-for-tourism",
-            storageBucket: "ai-tools-for-tourism.firebasestorage.app",
-            messagingSenderId: "426723838356",
-            appId: "1:426723838356:web:e21c62549ee1e91b16e781",
-            measurementId: "G-6Y6FHBS5ZT"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
+    <script>
         const toolsData = [
             // Marketing & Content Creation
             { id: 1, name: "ChatGPT (OpenAI)", category: "Marketing & Content Creation", description: "A powerful generative AI model that creates human-like text for a wide range of applications, including blog posts, social media updates, email newsletters, and detailed property descriptions. Essential for content scaling.", icon: "https://placehold.co/80x80/74AA9C/ffffff?text=GPT", upvotes: 5231, website: "https://chat.openai.com", founded: 2022, hq: "San Francisco, USA", features: ["Content Generation", "Summarization", "Translation", "Brainstorming", "API Access"], pricing: "Freemium", bestFor: ["Individuals", "Small Businesses", "Enterprises"] },
@@ -415,25 +361,21 @@
         
         // Auth elements
         const authLinks = document.getElementById('auth-links');
-        const accountDropdownContainer = document.getElementById('account-dropdown-container');
-        const accountBtn = document.getElementById('account-btn');
-        const accountDropdownMenu = document.getElementById('account-dropdown-menu');
-        const welcomeEmail = document.getElementById('welcome-email');
-        const myFavoritesLink = document.getElementById('my-favorites-link');
+        const userSession = document.getElementById('user-session');
+        const welcomeMsg = document.getElementById('welcome-msg');
         const logoutBtn = document.getElementById('logout-btn');
         const loginBtn = document.getElementById('login-btn');
         const signupBtn = document.getElementById('signup-btn');
         const signupModal = document.getElementById('signup-modal');
         const loginModal = document.getElementById('login-modal');
-        const forgotPasswordModal = document.getElementById('forgot-password-modal');
         const signupForm = document.getElementById('signup-form');
         const loginForm = document.getElementById('login-form');
-        const forgotPasswordForm = document.getElementById('forgot-password-form');
-        const forgotPasswordLink = document.getElementById('forgot-password-link');
-        const signupError = document.getElementById('signup-error');
-        const loginError = document.getElementById('login-error');
-        const forgotPasswordError = document.getElementById('forgot-password-error');
-        const forgotPasswordSuccess = document.getElementById('forgot-password-success');
+        const myToolsFilter = document.getElementById('my-tools-filter');
+        const accountDropdownContainer = document.getElementById('account-dropdown-container');
+        const accountBtn = document.getElementById('account-btn');
+        const accountDropdownMenu = document.getElementById('account-dropdown-menu');
+        const welcomeEmail = document.getElementById('welcome-email');
+        const myFavoritesLink = document.getElementById('my-favorites-link');
 
         // Detail page elements
         const detailIcon = document.getElementById('detail-icon');
@@ -520,7 +462,7 @@
 
             // If a search is performed, it should always search the entire database.
             // Visually reset the category filter to 'All Categories' to reflect this.
-            if (searchQuery) {
+            if (searchQuery && activeFilters.category === 'saved') {
                 activeFilters.category = 'all';
                 document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
                 document.querySelector('.category-link[data-category="all"]').classList.add('active');
@@ -640,7 +582,7 @@
             window.scrollTo(0, 0);
         }
         
-        async function handleSaveClick(toolId) {
+        function handleSaveClick(toolId) {
             if (!currentUser) {
                 pendingSaveToolId = toolId;
                 loginModal.classList.remove('hidden');
@@ -648,13 +590,10 @@
             }
             const tool = toolsData.find(t => t.id === toolId);
             if (tool) {
-                const userDocRef = doc(db, "users", currentUser.uid);
                 if (currentUser.savedTools.has(toolId)) {
                     currentUser.savedTools.delete(toolId);
-                    await updateDoc(userDocRef, { savedTools: arrayRemove(toolId) });
                 } else {
                     currentUser.savedTools.add(toolId);
-                    await updateDoc(userDocRef, { savedTools: arrayUnion(toolId) });
                 }
                 performSearchAndFilter(); // Re-render to update heart states
                 // Also update detail view if it's open
@@ -699,11 +638,22 @@
             handleSaveClick(toolId);
         });
 
+        document.getElementById('my-tools-list').addEventListener('click', function(e) {
+            e.preventDefault();
+            const link = e.target.closest('.category-link');
+            if (link) {
+                document.querySelectorAll('#category-list .category-link, #my-tools-list .category-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                activeFilters.category = link.dataset.category;
+                performSearchAndFilter();
+            }
+        });
+
         categoryList.addEventListener('click', function(e) {
             e.preventDefault();
             const link = e.target.closest('.category-link');
             if (link) {
-                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('#category-list .category-link, #my-tools-list .category-link').forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
                 activeFilters.category = link.dataset.category;
                 performSearchAndFilter();
@@ -796,25 +746,22 @@
         });
 
         // --- Auth Logic ---
-        function updateAuthUI(user) {
-            currentUser = user;
+        function updateAuthUI() {
             if (currentUser) {
                 authLinks.classList.add('hidden');
                 accountDropdownContainer.classList.remove('hidden');
+                myToolsFilter.classList.remove('hidden');
                 welcomeEmail.textContent = currentUser.email;
             } else {
                 authLinks.classList.remove('hidden');
                 accountDropdownContainer.classList.add('hidden');
+                myToolsFilter.classList.add('hidden');
             }
             performSearchAndFilter(); // Re-render tools to show correct saved state
         }
 
         function closeModal(modal) {
             modal.classList.add('hidden');
-            const errorEl = modal.querySelector('.text-red-500');
-            if (errorEl) errorEl.classList.add('hidden');
-            const successEl = modal.querySelector('.text-green-500');
-            if (successEl) successEl.classList.add('hidden');
         }
 
         loginBtn.addEventListener('click', (e) => {
@@ -833,101 +780,44 @@
 
         myFavoritesLink.addEventListener('click', (e) => {
             e.preventDefault();
-            document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
-            activeFilters.category = 'saved';
-            performSearchAndFilter();
+            document.querySelector('#my-tools-list .category-link').click();
             accountDropdownMenu.classList.add('hidden');
         });
 
-        logoutBtn.addEventListener('click', async (e) => {
+        logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            await signOut(auth);
+            currentUser = null;
             accountDropdownMenu.classList.add('hidden');
+            // When logging out, also clear the saved tools filter if it's active
+            if (activeFilters.category === 'saved') {
+                clearAllBtn.click();
+            }
+            updateAuthUI();
         });
 
-        forgotPasswordLink.addEventListener('click', (e) => {
+        function handleSuccessfulAuth(email) {
+            currentUser = { email, savedTools: new Set() };
+            updateAuthUI();
+            if (pendingSaveToolId) {
+                handleSaveClick(pendingSaveToolId);
+                pendingSaveToolId = null;
+            }
+        }
+
+        signupForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            const email = e.target.elements[0].value;
+            handleSuccessfulAuth(email);
+            closeModal(signupModal);
+            e.target.reset();
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = e.target.elements[0].value;
+            handleSuccessfulAuth(email);
             closeModal(loginModal);
-            forgotPasswordModal.classList.remove('hidden');
-        });
-
-        forgotPasswordForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = e.target.elements[0].value;
-            forgotPasswordError.classList.add('hidden');
-            forgotPasswordSuccess.classList.add('hidden');
-            try {
-                await sendPasswordResetEmail(auth, email);
-                forgotPasswordSuccess.textContent = "Password reset email sent! Check your inbox.";
-                forgotPasswordSuccess.classList.remove('hidden');
-                e.target.reset();
-            } catch (error) {
-                forgotPasswordError.textContent = error.message;
-                forgotPasswordError.classList.remove('hidden');
-            }
-        });
-
-        signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = e.target.elements[0].value;
-            const password = e.target.elements[1].value;
-            signupError.classList.add('hidden');
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                // Create a document for the new user
-                await setDoc(doc(db, "users", user.uid), {
-                    email: user.email,
-                    savedTools: []
-                });
-                closeModal(signupModal);
-                e.target.reset();
-            } catch (error) {
-                signupError.textContent = error.message;
-                signupError.classList.remove('hidden');
-            }
-        });
-
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = e.target.elements[0].value;
-            const password = e.target.elements[1].value;
-            loginError.classList.add('hidden');
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                closeModal(loginModal);
-                e.target.reset();
-            } catch (error) {
-                loginError.textContent = error.message;
-                loginError.classList.remove('hidden');
-            }
-        });
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // User is signed in
-                const userDocRef = doc(db, "users", user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                    const userData = userDocSnap.data();
-                    user.savedTools = new Set(userData.savedTools || []);
-                } else {
-                    // This case handles users who signed up but their doc wasn't created, or for safety.
-                    await setDoc(userDocRef, { email: user.email, savedTools: [] });
-                    user.savedTools = new Set();
-                }
-                updateAuthUI(user);
-                if (pendingSaveToolId) {
-                    await handleSaveClick(pendingSaveToolId);
-                    pendingSaveToolId = null;
-                }
-            } else {
-                // User is signed out
-                updateAuthUI(null);
-                if (activeFilters.category === 'saved') {
-                    clearAllBtn.click();
-                }
-            }
+            e.target.reset();
         });
 
         document.addEventListener('click', (e) => {
