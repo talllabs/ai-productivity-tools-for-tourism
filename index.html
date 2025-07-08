@@ -126,14 +126,6 @@
                     <button id="clear-all-btn" class="text-sm text-blue-600 hover:underline">Clear all</button>
                 </div>
                 <div class="space-y-4">
-                    <div id="my-tools-filter" class="hidden">
-                        <details open>
-                            <summary class="font-semibold cursor-pointer py-2">My Tools</summary>
-                            <ul id="my-tools-list" class="space-y-2 pt-2">
-                                <li><a href="#" class="category-link block px-4 py-2 rounded-lg hover:bg-gray-100 text-sm" data-category="saved">My Favorites</a></li>
-                            </ul>
-                        </details>
-                    </div>
                     <details open>
                         <summary class="font-semibold cursor-pointer py-2">Categories</summary>
                         <ul id="category-list" class="space-y-2 pt-2">
@@ -361,8 +353,11 @@
         
         // Auth elements
         const authLinks = document.getElementById('auth-links');
-        const userSession = document.getElementById('user-session');
-        const welcomeMsg = document.getElementById('welcome-msg');
+        const accountDropdownContainer = document.getElementById('account-dropdown-container');
+        const accountBtn = document.getElementById('account-btn');
+        const accountDropdownMenu = document.getElementById('account-dropdown-menu');
+        const welcomeEmail = document.getElementById('welcome-email');
+        const myFavoritesLink = document.getElementById('my-favorites-link');
         const logoutBtn = document.getElementById('logout-btn');
         const loginBtn = document.getElementById('login-btn');
         const signupBtn = document.getElementById('signup-btn');
@@ -370,12 +365,6 @@
         const loginModal = document.getElementById('login-modal');
         const signupForm = document.getElementById('signup-form');
         const loginForm = document.getElementById('login-form');
-        const myToolsFilter = document.getElementById('my-tools-filter');
-        const accountDropdownContainer = document.getElementById('account-dropdown-container');
-        const accountBtn = document.getElementById('account-btn');
-        const accountDropdownMenu = document.getElementById('account-dropdown-menu');
-        const welcomeEmail = document.getElementById('welcome-email');
-        const myFavoritesLink = document.getElementById('my-favorites-link');
 
         // Detail page elements
         const detailIcon = document.getElementById('detail-icon');
@@ -462,7 +451,7 @@
 
             // If a search is performed, it should always search the entire database.
             // Visually reset the category filter to 'All Categories' to reflect this.
-            if (searchQuery && activeFilters.category === 'saved') {
+            if (searchQuery) {
                 activeFilters.category = 'all';
                 document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
                 document.querySelector('.category-link[data-category="all"]').classList.add('active');
@@ -638,22 +627,11 @@
             handleSaveClick(toolId);
         });
 
-        document.getElementById('my-tools-list').addEventListener('click', function(e) {
-            e.preventDefault();
-            const link = e.target.closest('.category-link');
-            if (link) {
-                document.querySelectorAll('#category-list .category-link, #my-tools-list .category-link').forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-                activeFilters.category = link.dataset.category;
-                performSearchAndFilter();
-            }
-        });
-
         categoryList.addEventListener('click', function(e) {
             e.preventDefault();
             const link = e.target.closest('.category-link');
             if (link) {
-                document.querySelectorAll('#category-list .category-link, #my-tools-list .category-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
                 link.classList.add('active');
                 activeFilters.category = link.dataset.category;
                 performSearchAndFilter();
@@ -750,12 +728,10 @@
             if (currentUser) {
                 authLinks.classList.add('hidden');
                 accountDropdownContainer.classList.remove('hidden');
-                myToolsFilter.classList.remove('hidden');
                 welcomeEmail.textContent = currentUser.email;
             } else {
                 authLinks.classList.remove('hidden');
                 accountDropdownContainer.classList.add('hidden');
-                myToolsFilter.classList.add('hidden');
             }
             performSearchAndFilter(); // Re-render tools to show correct saved state
         }
@@ -780,7 +756,9 @@
 
         myFavoritesLink.addEventListener('click', (e) => {
             e.preventDefault();
-            document.querySelector('#my-tools-list .category-link').click();
+            document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+            activeFilters.category = 'saved';
+            performSearchAndFilter();
             accountDropdownMenu.classList.add('hidden');
         });
 
