@@ -239,9 +239,25 @@
             <h2 class="text-2xl font-bold mb-4">Login</h2>
             <form id="login-form">
                 <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
-                <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
+                <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-2" required>
+                <div class="text-right mb-4">
+                    <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline">Forgot Password?</a>
+                </div>
                 <p id="login-error" class="text-red-500 text-sm mb-4 hidden"></p>
                 <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Login</button>
+            </form>
+        </div>
+    </div>
+    <div id="forgot-password-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full relative">
+            <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            <h2 class="text-2xl font-bold mb-4">Reset Password</h2>
+            <form id="forgot-password-form">
+                <p class="text-sm text-gray-600 mb-4">Enter your email address and we will send you a link to reset your password.</p>
+                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
+                <p id="forgot-password-error" class="text-red-500 text-sm mb-4 hidden"></p>
+                <p id="forgot-password-success" class="text-green-500 text-sm mb-4 hidden"></p>
+                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Send Reset Link</button>
             </form>
         </div>
     </div>
@@ -261,7 +277,8 @@
             createUserWithEmailAndPassword, 
             signInWithEmailAndPassword, 
             signOut, 
-            onAuthStateChanged 
+            onAuthStateChanged,
+            sendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
             getFirestore, 
@@ -400,10 +417,15 @@
         const signupBtn = document.getElementById('signup-btn');
         const signupModal = document.getElementById('signup-modal');
         const loginModal = document.getElementById('login-modal');
+        const forgotPasswordModal = document.getElementById('forgot-password-modal');
         const signupForm = document.getElementById('signup-form');
         const loginForm = document.getElementById('login-form');
+        const forgotPasswordForm = document.getElementById('forgot-password-form');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
         const signupError = document.getElementById('signup-error');
         const loginError = document.getElementById('login-error');
+        const forgotPasswordError = document.getElementById('forgot-password-error');
+        const forgotPasswordSuccess = document.getElementById('forgot-password-success');
 
         // Detail page elements
         const detailIcon = document.getElementById('detail-icon');
@@ -783,6 +805,8 @@
             modal.classList.add('hidden');
             const errorEl = modal.querySelector('.text-red-500');
             if (errorEl) errorEl.classList.add('hidden');
+            const successEl = modal.querySelector('.text-green-500');
+            if (successEl) successEl.classList.add('hidden');
         }
 
         loginBtn.addEventListener('click', (e) => {
@@ -811,6 +835,28 @@
             e.preventDefault();
             await signOut(auth);
             accountDropdownMenu.classList.add('hidden');
+        });
+
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModal(loginModal);
+            forgotPasswordModal.classList.remove('hidden');
+        });
+
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.elements[0].value;
+            forgotPasswordError.classList.add('hidden');
+            forgotPasswordSuccess.classList.add('hidden');
+            try {
+                await sendPasswordResetEmail(auth, email);
+                forgotPasswordSuccess.textContent = "Password reset email sent! Check your inbox.";
+                forgotPasswordSuccess.classList.remove('hidden');
+                e.target.reset();
+            } catch (error) {
+                forgotPasswordError.textContent = error.message;
+                forgotPasswordError.classList.remove('hidden');
+            }
         });
 
         signupForm.addEventListener('submit', async (e) => {
