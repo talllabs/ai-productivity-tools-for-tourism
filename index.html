@@ -900,19 +900,27 @@
             if (user) {
                 // User is signed in
                 const userDocRef = doc(db, "users", user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                    const userData = userDocSnap.data();
-                    user.savedTools = new Set(userData.savedTools || []);
-                } else {
-                    // This case handles users who signed up but their doc wasn't created, or for safety.
-                    await setDoc(userDocRef, { email: user.email, savedTools: [] });
+                try {
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        user.savedTools = new Set(userData.savedTools || []);
+                    } else {
+                        // This case handles users who signed up but their doc wasn't created, or for safety.
+                        await setDoc(userDocRef, { email: user.email, savedTools: [] });
+                        user.savedTools = new Set();
+                    }
+                    updateAuthUI(user);
+                    if (pendingSaveToolId) {
+                        await handleSaveClick(pendingSaveToolId);
+                        pendingSaveToolId = null;
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                    alert("Could not fetch user data. This is likely due to incorrect Firestore security rules. Please check the console for more details.");
+                    // Log in the user on the frontend anyway, but without saved tools
                     user.savedTools = new Set();
-                }
-                updateAuthUI(user);
-                if (pendingSaveToolId) {
-                    await handleSaveClick(pendingSaveToolId);
-                    pendingSaveToolId = null;
+                    updateAuthUI(user);
                 }
             } else {
                 // User is signed out
@@ -970,7 +978,7 @@
         createFilterCheckboxes('bestFor', 'bestfor-filter-list');
         showGridView();
         performSearchAndFilter();
-        updateAuthUI();
+        // onAuthStateChanged will handle the initial UI update
         startPlaceholderRotation();
     </script>
 </body>
