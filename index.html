@@ -226,8 +226,9 @@
              <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
             <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
             <form id="signup-form">
-                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-4" required>
+                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
                 <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
+                <p id="signup-error" class="text-red-500 text-sm mb-4 hidden"></p>
                 <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Create Account</button>
             </form>
         </div>
@@ -237,8 +238,9 @@
             <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
             <h2 class="text-2xl font-bold mb-4">Login</h2>
             <form id="login-form">
-                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-4" required>
+                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
                 <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
+                <p id="login-error" class="text-red-500 text-sm mb-4 hidden"></p>
                 <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Login</button>
             </form>
         </div>
@@ -251,7 +253,41 @@
         </div>
     </footer>
 
-    <script>
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            signOut, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            updateDoc, 
+            arrayUnion, 
+            arrayRemove 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // IMPORTANT: Replace with your actual Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
         const toolsData = [
             // Marketing & Content Creation
             { id: 1, name: "ChatGPT (OpenAI)", category: "Marketing & Content Creation", description: "A powerful generative AI model that creates human-like text for a wide range of applications, including blog posts, social media updates, email newsletters, and detailed property descriptions. Essential for content scaling.", icon: "https://placehold.co/80x80/74AA9C/ffffff?text=GPT", upvotes: 5231, website: "https://chat.openai.com", founded: 2022, hq: "San Francisco, USA", features: ["Content Generation", "Summarization", "Translation", "Brainstorming", "API Access"], pricing: "Freemium", bestFor: ["Individuals", "Small Businesses", "Enterprises"] },
@@ -365,6 +401,8 @@
         const loginModal = document.getElementById('login-modal');
         const signupForm = document.getElementById('signup-form');
         const loginForm = document.getElementById('login-form');
+        const signupError = document.getElementById('signup-error');
+        const loginError = document.getElementById('login-error');
 
         // Detail page elements
         const detailIcon = document.getElementById('detail-icon');
@@ -571,7 +609,7 @@
             window.scrollTo(0, 0);
         }
         
-        function handleSaveClick(toolId) {
+        async function handleSaveClick(toolId) {
             if (!currentUser) {
                 pendingSaveToolId = toolId;
                 loginModal.classList.remove('hidden');
@@ -579,10 +617,13 @@
             }
             const tool = toolsData.find(t => t.id === toolId);
             if (tool) {
+                const userDocRef = doc(db, "users", currentUser.uid);
                 if (currentUser.savedTools.has(toolId)) {
                     currentUser.savedTools.delete(toolId);
+                    await updateDoc(userDocRef, { savedTools: arrayRemove(toolId) });
                 } else {
                     currentUser.savedTools.add(toolId);
+                    await updateDoc(userDocRef, { savedTools: arrayUnion(toolId) });
                 }
                 performSearchAndFilter(); // Re-render to update heart states
                 // Also update detail view if it's open
@@ -724,7 +765,8 @@
         });
 
         // --- Auth Logic ---
-        function updateAuthUI() {
+        function updateAuthUI(user) {
+            currentUser = user;
             if (currentUser) {
                 authLinks.classList.add('hidden');
                 accountDropdownContainer.classList.remove('hidden');
@@ -738,6 +780,8 @@
 
         function closeModal(modal) {
             modal.classList.add('hidden');
+            const errorEl = modal.querySelector('.text-red-500');
+            if (errorEl) errorEl.classList.add('hidden');
         }
 
         loginBtn.addEventListener('click', (e) => {
@@ -762,40 +806,73 @@
             accountDropdownMenu.classList.add('hidden');
         });
 
-        logoutBtn.addEventListener('click', (e) => {
+        logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            currentUser = null;
+            await signOut(auth);
             accountDropdownMenu.classList.add('hidden');
-            // When logging out, also clear the saved tools filter if it's active
-            if (activeFilters.category === 'saved') {
-                clearAllBtn.click();
-            }
-            updateAuthUI();
         });
 
-        function handleSuccessfulAuth(email) {
-            currentUser = { email, savedTools: new Set() };
-            updateAuthUI();
-            if (pendingSaveToolId) {
-                handleSaveClick(pendingSaveToolId);
-                pendingSaveToolId = null;
-            }
-        }
-
-        signupForm.addEventListener('submit', (e) => {
+        signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = e.target.elements[0].value;
-            handleSuccessfulAuth(email);
-            closeModal(signupModal);
-            e.target.reset();
+            const password = e.target.elements[1].value;
+            signupError.classList.add('hidden');
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                // Create a document for the new user
+                await setDoc(doc(db, "users", user.uid), {
+                    email: user.email,
+                    savedTools: []
+                });
+                closeModal(signupModal);
+                e.target.reset();
+            } catch (error) {
+                signupError.textContent = error.message;
+                signupError.classList.remove('hidden');
+            }
         });
 
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = e.target.elements[0].value;
-            handleSuccessfulAuth(email);
-            closeModal(loginModal);
-            e.target.reset();
+            const password = e.target.elements[1].value;
+            loginError.classList.add('hidden');
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                closeModal(loginModal);
+                e.target.reset();
+            } catch (error) {
+                loginError.textContent = error.message;
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    user.savedTools = new Set(userData.savedTools || []);
+                } else {
+                    // This case handles users who signed up but their doc wasn't created, or for safety.
+                    await setDoc(userDocRef, { email: user.email, savedTools: [] });
+                    user.savedTools = new Set();
+                }
+                updateAuthUI(user);
+                if (pendingSaveToolId) {
+                    await handleSaveClick(pendingSaveToolId);
+                    pendingSaveToolId = null;
+                }
+            } else {
+                // User is signed out
+                updateAuthUI(null);
+                if (activeFilters.category === 'saved') {
+                    clearAllBtn.click();
+                }
+            }
         });
 
         document.addEventListener('click', (e) => {
