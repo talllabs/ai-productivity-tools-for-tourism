@@ -460,6 +460,14 @@
             const searchQuery = searchInput.value.toLowerCase().trim();
             let filteredTools = [...toolsData];
 
+            // If a search is performed, it should always search the entire database.
+            // Visually reset the category filter to 'All Categories' to reflect this.
+            if (searchQuery && activeFilters.category === 'saved') {
+                activeFilters.category = 'all';
+                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+                document.querySelector('.category-link[data-category="all"]').classList.add('active');
+            }
+
             // 1. Apply all sidebar filters
             if (activeFilters.category === 'saved') {
                 if (currentUser) {
