@@ -334,4 +334,597 @@
             
             // Revenue Management
             { id: 109, name: "IDeaS Revenue Solutions", category: "Revenue Management", description: "Automated revenue management system for hotels to optimize pricing and occupancy.", icon: "https://placehold.co/80x80/B22222/ffffff?text=ID", upvotes: 2850, website: "https://ideas.com", founded: 1989, hq: "Bloomington, USA", features: ["Dynamic Pricing", "Revenue Management", "Forecasting"], pricing: "Paid", bestFor: ["Hotels", "Enterprises"] },
-            { id: 110, name: "Pricepoint", category: "Revenue Management", description: "Dynamic pricing software that analyzes demand and competition to adjust rates.", icon: "https://placehold.co/80x80/4169E1/ffffff?text=P", upvotes: 2750, website: "https://www.pricepoi
+            { id: 110, name: "Pricepoint", category: "Revenue Management", description: "Dynamic pricing software that analyzes demand and competition to adjust rates.", icon: "https://placehold.co/80x80/4169E1/ffffff?text=P", upvotes: 2750, website: "https://www.pricepoint.co", founded: 2014, hq: "Milan, Italy", features: ["Dynamic Pricing", "Competitor Analysis", "Market Insights"], pricing: "Paid", bestFor: ["Hotels"] },
+            { id: 111, name: "Atomize", category: "Revenue Management", description: "Real-time price automation for hotels to maximize revenue.", icon: "https://placehold.co/80x80/8A2BE2/ffffff?text=A", upvotes: 2650, website: "https://atomize.com", founded: 2017, hq: "Gothenburg, Sweden", features: ["Real-time Pricing", "Demand Forecasting", "Group Bookings"], pricing: "Paid", bestFor: ["Hotels"] },
+            { id: 59, name: "RoomPriceGenie", category: "Revenue Management", description: "Automated dynamic pricing tool for independent hotels.", icon: "https://placehold.co/80x80/2ecc71/ffffff?text=RPG", upvotes: 1250, website: "https://www.roompricegenie.com", founded: 2017, hq: "Zug, Switzerland", features: ["Automated Pricing", "Easy Setup", "Market Data"], pricing: "Paid", bestFor: ["Hotels", "Small Businesses"] },
+            { id: 60, name: "Revinate", category: "Revenue Management", description: "Guest data platform and marketing automation for hotels to drive direct revenue.", icon: "https://placehold.co/80x80/f1c40f/ffffff?text=R", upvotes: 1200, website: "https://www.revinate.com", founded: 2009, hq: "San Francisco, USA", features: ["Guest CRM", "Email Marketing", "Upselling"], pricing: "Paid", bestFor: ["Hotels"] },
+        ];
+        
+        const useCases = [
+            "e.g., Generate a blog post about sustainable travel",
+            "e.g., Create a promotional video for a new hotel",
+            "e.g., Analyze customer reviews for sentiment",
+            "e.g., Find a tool to manage social media scheduling",
+            "e.g., I need a chatbot for my website",
+            "e.g., Optimize hotel room pricing for next season",
+            "e.g., Create personalized email marketing campaigns",
+            "e.g., Transcribe meeting notes automatically",
+            "e.g., Find a CRM for a small tour company",
+            "e.g., Generate realistic images for a new travel package",
+            "e.g., Automate expense reporting for business travel",
+            "e.g., Build a simple booking engine",
+            "e.g., Analyze foot traffic for a new restaurant location",
+            "e.g., Create voiceovers for marketing videos",
+            "e.g., I need a tool for dynamic pricing",
+            "e.g., Help me write ad copy",
+            "e.g., Find a system to track baggage",
+            "e.g., I need to manage our company's digital assets",
+            "e.g., Forecast travel demand for the holidays",
+            "e.g., Create a professional presentation quickly"
+        ];
+
+        let activeFilters = {
+            category: 'all',
+            pricing: new Set(),
+            bestFor: new Set(),
+            features: new Set()
+        };
+        let currentUser = null;
+        const upvotedTools = new Set();
+        let placeholderInterval;
+        let pendingSaveToolId = null;
+
+        const toolsGrid = document.getElementById('tools-grid');
+        const categoryList = document.getElementById('category-list');
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const searchResultsInfo = document.getElementById('search-results-info');
+        const clearSearchBtn = document.getElementById('clear-search-btn');
+        const clearAllBtn = document.getElementById('clear-all-btn');
+        const sortBy = document.getElementById('sort-by');
+        
+        const toolsGridView = document.getElementById('tools-grid-view');
+        const toolDetailView = document.getElementById('tool-detail-view');
+        const mainContentArea = document.getElementById('tools');
+        const backToToolsBtn = document.getElementById('back-to-tools-btn');
+        
+        // Auth elements
+        const authLinks = document.getElementById('auth-links');
+        const accountDropdownContainer = document.getElementById('account-dropdown-container');
+        const accountBtn = document.getElementById('account-btn');
+        const accountDropdownMenu = document.getElementById('account-dropdown-menu');
+        const welcomeEmail = document.getElementById('welcome-email');
+        const myFavoritesLink = document.getElementById('my-favorites-link');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const signupModal = document.getElementById('signup-modal');
+        const loginModal = document.getElementById('login-modal');
+        const signupForm = document.getElementById('signup-form');
+        const loginForm = document.getElementById('login-form');
+        const signupError = document.getElementById('signup-error');
+        const loginError = document.getElementById('login-error');
+
+        // Detail page elements
+        const detailIcon = document.getElementById('detail-icon');
+        const detailName = document.getElementById('detail-name');
+        const detailCategory = document.getElementById('detail-category');
+        const detailDescription = document.getElementById('detail-description');
+        const detailFeatures = document.getElementById('detail-features');
+        const detailWebsiteLink = document.getElementById('detail-website-link');
+        const detailFounded = document.getElementById('detail-founded');
+        const detailHq = document.getElementById('detail-hq');
+        const detailUpvotes = document.getElementById('detail-upvotes');
+
+        function standardizeData() {
+            const featureMap = {
+                'ai chatbots': 'AI Chatbot', 'ai chatbot': 'AI Chatbot', 'conversational ai': 'AI Chatbot', 'ai chat': 'AI Chatbot', 'ai answer bot': 'AI Chatbot',
+                'transcription': 'Transcription', 'transcribe': 'Transcription',
+                'summarization': 'Summarization', 'meeting summaries': 'Summarization', 'channel recaps': 'Summarization', 'thread summaries': 'Summarization',
+                'content generation': 'Content Generation', 'ai writer': 'Content Generation', 'writing & editing': 'Content Generation', 'ai content assistant': 'Content Generation',
+                'booking systems': 'Booking Engine', 'booking engine': 'Booking Engine', 'online booking portal': 'Booking Engine', 'booking portal development': 'Booking Engine',
+                'dynamic pricing': 'Dynamic Pricing', 'real-time pricing': 'Dynamic Pricing', 'automated pricing': 'Dynamic Pricing',
+                'text-to-video': 'Text-to-Video', 'generative video': 'Text-to-Video',
+                'analytics': 'Analytics', 'business intelligence': 'Analytics',
+                'crm': 'CRM', 'guest crm': 'CRM',
+            };
+
+            toolsData.forEach(tool => {
+                if (tool.features) {
+                    const standardized = new Set(tool.features.map(f => {
+                        const lowerF = f.toLowerCase();
+                        return featureMap[lowerF] || f;
+                    }));
+                    tool.features = [...standardized];
+                }
+            });
+        }
+
+        function createFilterCheckboxes(filterType, containerId) {
+            const container = document.getElementById(containerId);
+            const uniqueValues = [...new Set(toolsData.flatMap(tool => tool[filterType] || []))];
+            uniqueValues.sort();
+            
+            container.innerHTML = uniqueValues.map(value => `
+                <label class="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" class="filter-checkbox rounded" data-filter-type="${filterType}" value="${value}">
+                    <span>${value}</span>
+                </label>
+            `).join('');
+        }
+
+        const displayTools = (tools) => {
+            toolsGrid.innerHTML = '';
+            if (tools.length === 0) {
+                toolsGrid.innerHTML = `<p class="col-span-full text-center text-gray-500">No tools found matching your criteria.</p>`;
+            } else {
+                tools.forEach(tool => {
+                    const shortDesc = tool.description.split('. ')[0] + '.';
+                    const isUpvoted = upvotedTools.has(tool.id);
+                    const isSaved = currentUser && currentUser.savedTools.has(tool.id);
+                    const toolCard = `
+                        <div class="tool-card bg-white rounded-lg shadow-md p-6 text-center" data-category="${tool.category}" data-id="${tool.id}">
+                             <button class="save-btn absolute top-2 right-2 p-2 rounded-full hover:bg-red-100 ${isSaved ? 'saved' : ''}" data-tool-id="${tool.id}">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                            </button>
+                            <img src="${tool.icon}" alt="${tool.name} Icon" class="w-20 h-20 mb-4 rounded-full mx-auto" onerror="this.onerror=null;this.src='https.placehold.co/80x80/cccccc/ffffff?text=Error';">
+                            <h3 class="text-xl font-bold mb-2">${tool.name}</h3>
+                            <p class="text-gray-600 mb-4 flex-grow">${shortDesc}</p>
+                            <div class="mt-auto flex justify-between items-center w-full">
+                                <button class="learn-more-btn bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 text-sm flex-grow mr-2">Learn More</button>
+                                <button class="upvote-btn border border-gray-300 rounded-full px-4 py-2 flex items-center justify-center hover:bg-gray-100 transition duration-300 ${isUpvoted ? 'upvoted' : ''}" data-tool-id="${tool.id}">
+                                    <svg class="w-4 h-4 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+                                    <span class="font-bold text-gray-800 upvote-count">${tool.upvotes}</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    toolsGrid.innerHTML += toolCard;
+                });
+            }
+        };
+
+        const performSearchAndFilter = () => {
+            const searchQuery = searchInput.value.toLowerCase().trim();
+            let filteredTools = [...toolsData];
+
+            // If a search is performed, it should always search the entire database.
+            // Visually reset the category filter to 'All Categories' to reflect this.
+            if (searchQuery) {
+                activeFilters.category = 'all';
+                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+                document.querySelector('.category-link[data-category="all"]').classList.add('active');
+            }
+
+            // 1. Apply all sidebar filters
+            if (activeFilters.category === 'saved') {
+                if (currentUser) {
+                    filteredTools = filteredTools.filter(tool => currentUser.savedTools.has(tool.id));
+                } else {
+                    filteredTools = []; // Show no saved tools if not logged in
+                }
+            } else {
+                 if (activeFilters.category !== 'all') {
+                    filteredTools = filteredTools.filter(tool => tool.category === activeFilters.category);
+                }
+                if (activeFilters.pricing.size > 0) {
+                    filteredTools = filteredTools.filter(tool => activeFilters.pricing.has(tool.pricing));
+                }
+                if (activeFilters.bestFor.size > 0) {
+                    filteredTools = filteredTools.filter(tool => tool.bestFor && tool.bestFor.some(bf => activeFilters.bestFor.has(bf)));
+                }
+                 if (activeFilters.features.size > 0) {
+                    filteredTools = filteredTools.filter(tool => tool.features && tool.features.some(feat => activeFilters.features.has(feat)));
+                }
+            }
+            
+            // 2. Handle search query
+            if (searchQuery) {
+                const stopWords = new Set(['i', 'a', 'an', 'the', 'to', 'for', 'in', 'of', 'my', 'need', 'someone', 'build', 'create', 'and', 'with', 'how', 'can', 'get', 'is', 'are']);
+                const searchKeywords = searchQuery.replace(/[.,!?]/g, '').split(' ').filter(word => !stopWords.has(word) && word.length > 1);
+
+                if (searchKeywords.length > 0) {
+                     const scoredTools = filteredTools.map(tool => {
+                        const searchableText = [
+                            tool.name,
+                            tool.description,
+                            tool.category,
+                            ...(tool.features || [])
+                        ].join(' ').toLowerCase();
+                        
+                        let score = 0;
+                        searchKeywords.forEach(keyword => {
+                            if (searchableText.includes(keyword)) {
+                                score++;
+                            }
+                        });
+                        
+                        return { ...tool, score };
+                    });
+                    filteredTools = scoredTools.filter(tool => tool.score > 0);
+                }
+                
+                searchResultsInfo.textContent = `Showing results for "${searchInput.value}"`;
+                searchResultsInfo.classList.remove('hidden');
+                clearSearchBtn.classList.remove('hidden');
+                sortBy.value = 'relevance'; // Default to relevance on search
+            } else {
+                searchResultsInfo.classList.add('hidden');
+                clearSearchBtn.classList.add('hidden');
+                if (sortBy.value === 'relevance') {
+                    sortBy.value = 'upvotes_desc'; // Default to upvotes if no search
+                }
+            }
+            
+            // 3. Apply sorting
+            const sortOption = sortBy.value;
+            if (sortOption === 'relevance' && searchQuery && filteredTools.every(t => 'score' in t)) {
+                 filteredTools.sort((a, b) => b.score - a.score);
+            } else if (sortOption === 'upvotes_desc') {
+                filteredTools.sort((a, b) => b.upvotes - a.upvotes);
+            } else if (sortOption === 'upvotes_asc') {
+                filteredTools.sort((a, b) => a.upvotes - b.upvotes);
+            }
+            
+            displayTools(filteredTools);
+        };
+
+        function showGridView() {
+            toolDetailView.classList.add('hidden');
+            mainContentArea.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function showDetailView(toolId) {
+            const tool = toolsData.find(t => t.id === toolId);
+            if (!tool) return;
+
+            detailIcon.src = tool.icon;
+            detailName.textContent = tool.name;
+            detailCategory.textContent = tool.category;
+            detailDescription.textContent = tool.description;
+            detailWebsiteLink.href = tool.website;
+            detailFounded.textContent = tool.founded || 'N/A';
+            detailHq.textContent = tool.hq || 'N/A';
+            detailUpvotes.textContent = tool.upvotes;
+
+            const saveBtnDetail = document.querySelector('.save-btn-detail');
+            saveBtnDetail.dataset.toolId = tool.id;
+            if (currentUser && currentUser.savedTools.has(tool.id)) {
+                saveBtnDetail.classList.add('saved');
+            } else {
+                saveBtnDetail.classList.remove('saved');
+            }
+
+            detailFeatures.innerHTML = '';
+            (tool.features || []).forEach(feature => {
+                const featureEl = document.createElement('span');
+                featureEl.className = 'feature-tag-clickable bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full';
+                featureEl.textContent = feature;
+                featureEl.dataset.feature = feature;
+                detailFeatures.appendChild(featureEl);
+            });
+
+            mainContentArea.classList.add('hidden');
+            toolDetailView.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+        
+        async function handleSaveClick(toolId) {
+            if (!currentUser) {
+                pendingSaveToolId = toolId;
+                loginModal.classList.remove('hidden');
+                return;
+            }
+            const tool = toolsData.find(t => t.id === toolId);
+            if (tool) {
+                const userDocRef = doc(db, "users", currentUser.uid);
+                if (currentUser.savedTools.has(toolId)) {
+                    currentUser.savedTools.delete(toolId);
+                    await updateDoc(userDocRef, { savedTools: arrayRemove(toolId) });
+                } else {
+                    currentUser.savedTools.add(toolId);
+                    await updateDoc(userDocRef, { savedTools: arrayUnion(toolId) });
+                }
+                performSearchAndFilter(); // Re-render to update heart states
+                // Also update detail view if it's open
+                if (!toolDetailView.classList.contains('hidden') && parseInt(document.querySelector('.save-btn-detail').dataset.toolId) === toolId) {
+                    const saveBtnDetail = document.querySelector('.save-btn-detail');
+                    if (currentUser.savedTools.has(toolId)) {
+                        saveBtnDetail.classList.add('saved');
+                    } else {
+                        saveBtnDetail.classList.remove('saved');
+                    }
+                }
+            }
+        }
+
+        toolsGrid.addEventListener('click', function(e) {
+            const upvoteButton = e.target.closest('.upvote-btn');
+            const learnMoreButton = e.target.closest('.learn-more-btn');
+            const saveButton = e.target.closest('.save-btn');
+
+            if (upvoteButton) {
+                const toolId = parseInt(upvoteButton.dataset.toolId, 10);
+                if (!upvotedTools.has(toolId)) {
+                    const tool = toolsData.find(t => t.id === toolId);
+                    if (tool) {
+                        tool.upvotes++;
+                        upvotedTools.add(toolId);
+                        performSearchAndFilter();
+                    }
+                }
+            } else if (learnMoreButton) {
+                const toolCard = learnMoreButton.closest('.tool-card');
+                const toolId = parseInt(toolCard.dataset.id, 10);
+                showDetailView(toolId);
+            } else if (saveButton) {
+                const toolId = parseInt(saveButton.dataset.toolId, 10);
+                handleSaveClick(toolId);
+            }
+        });
+
+        document.querySelector('.save-btn-detail').addEventListener('click', function(e){
+            const toolId = parseInt(e.currentTarget.dataset.toolId, 10);
+            handleSaveClick(toolId);
+        });
+
+        categoryList.addEventListener('click', function(e) {
+            e.preventDefault();
+            const link = e.target.closest('.category-link');
+            if (link) {
+                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                activeFilters.category = link.dataset.category;
+                performSearchAndFilter();
+            }
+        });
+        
+        document.getElementById('features-filter-list').addEventListener('change', (e) => {
+            if (e.target.classList.contains('filter-checkbox')) {
+                const { value, checked } = e.target;
+                if (checked) {
+                    activeFilters.features.add(value);
+                } else {
+                    activeFilters.features.delete(value);
+                }
+                performSearchAndFilter();
+            }
+        });
+
+        document.querySelector('#pricing-filter-list').addEventListener('change', (e) => {
+            if (e.target.classList.contains('filter-checkbox')) {
+                const { value, checked } = e.target;
+                if (checked) {
+                    activeFilters.pricing.add(value);
+                } else {
+                    activeFilters.pricing.delete(value);
+                }
+                performSearchAndFilter();
+            }
+        });
+
+        document.querySelector('#bestfor-filter-list').addEventListener('change', (e) => {
+            if (e.target.classList.contains('filter-checkbox')) {
+                const { value, checked } = e.target;
+                if (checked) {
+                    activeFilters.bestFor.add(value);
+                } else {
+                    activeFilters.bestFor.delete(value);
+                }
+                performSearchAndFilter();
+            }
+        });
+
+        clearAllBtn.addEventListener('click', () => {
+             // Reset search
+            searchInput.value = '';
+            // Reset category
+            document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+            document.querySelector('.category-link[data-category="all"]').classList.add('active');
+            activeFilters.category = 'all';
+            // Reset checkboxes
+            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+            activeFilters.pricing.clear();
+            activeFilters.bestFor.clear();
+            activeFilters.features.clear();
+            // Reset sort
+            sortBy.value = 'upvotes_desc';
+            // Rerun filter
+            performSearchAndFilter();
+        });
+
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            performSearchAndFilter();
+        });
+
+        backToToolsBtn.addEventListener('click', showGridView);
+        searchBtn.addEventListener('click', performSearchAndFilter);
+        sortBy.addEventListener('change', performSearchAndFilter);
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                performSearchAndFilter();
+            }
+        });
+
+        // Clickable features on detail page
+        detailFeatures.addEventListener('click', (e) => {
+            if (e.target.classList.contains('feature-tag-clickable')) {
+                const feature = e.target.dataset.feature;
+                // Clear all filters first
+                clearAllBtn.click();
+                // Check the corresponding feature checkbox
+                const featureCheckbox = document.querySelector(`#features-filter-list input[value="${feature}"]`);
+                if (featureCheckbox) {
+                    featureCheckbox.checked = true;
+                    activeFilters.features.add(feature);
+                }
+                showGridView();
+                performSearchAndFilter();
+            }
+        });
+
+        // --- Auth Logic ---
+        function updateAuthUI(user) {
+            currentUser = user;
+            if (currentUser) {
+                authLinks.classList.add('hidden');
+                accountDropdownContainer.classList.remove('hidden');
+                welcomeEmail.textContent = currentUser.email;
+            } else {
+                authLinks.classList.remove('hidden');
+                accountDropdownContainer.classList.add('hidden');
+            }
+            performSearchAndFilter(); // Re-render tools to show correct saved state
+        }
+
+        function closeModal(modal) {
+            modal.classList.add('hidden');
+            const errorEl = modal.querySelector('.text-red-500');
+            if (errorEl) errorEl.classList.add('hidden');
+        }
+
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.classList.remove('hidden');
+        });
+
+        signupBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupModal.classList.remove('hidden');
+        });
+        
+        accountBtn.addEventListener('click', () => {
+            accountDropdownMenu.classList.toggle('hidden');
+        });
+
+        myFavoritesLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
+            activeFilters.category = 'saved';
+            performSearchAndFilter();
+            accountDropdownMenu.classList.add('hidden');
+        });
+
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await signOut(auth);
+            accountDropdownMenu.classList.add('hidden');
+        });
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.elements[0].value;
+            const password = e.target.elements[1].value;
+            signupError.classList.add('hidden');
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                // Create a document for the new user
+                await setDoc(doc(db, "users", user.uid), {
+                    email: user.email,
+                    savedTools: []
+                });
+                closeModal(signupModal);
+                e.target.reset();
+            } catch (error) {
+                signupError.textContent = error.message;
+                signupError.classList.remove('hidden');
+            }
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.elements[0].value;
+            const password = e.target.elements[1].value;
+            loginError.classList.add('hidden');
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                closeModal(loginModal);
+                e.target.reset();
+            } catch (error) {
+                loginError.textContent = error.message;
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    user.savedTools = new Set(userData.savedTools || []);
+                } else {
+                    // This case handles users who signed up but their doc wasn't created, or for safety.
+                    await setDoc(userDocRef, { email: user.email, savedTools: [] });
+                    user.savedTools = new Set();
+                }
+                updateAuthUI(user);
+                if (pendingSaveToolId) {
+                    await handleSaveClick(pendingSaveToolId);
+                    pendingSaveToolId = null;
+                }
+            } else {
+                // User is signed out
+                updateAuthUI(null);
+                if (activeFilters.category === 'saved') {
+                    clearAllBtn.click();
+                }
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!accountDropdownContainer.contains(e.target)) {
+                accountDropdownMenu.classList.add('hidden');
+            }
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                if (e.target === modal || e.target.classList.contains('close-modal-btn')) {
+                    closeModal(modal);
+                }
+            });
+        });
+
+        // --- Dynamic Placeholder Logic ---
+        function updateDynamicPlaceholder() {
+            const randomIndex = Math.floor(Math.random() * useCases.length);
+            searchInput.style.opacity = 0;
+            setTimeout(() => {
+                searchInput.placeholder = useCases[randomIndex];
+                searchInput.style.opacity = 1;
+            }, 500);
+        }
+
+        function startPlaceholderRotation() {
+            if (!placeholderInterval) {
+                placeholderInterval = setInterval(updateDynamicPlaceholder, 5000);
+            }
+        }
+
+        function stopPlaceholderRotation() {
+            clearInterval(placeholderInterval);
+            placeholderInterval = null;
+        }
+
+        searchInput.addEventListener('focus', stopPlaceholderRotation);
+        searchInput.addEventListener('blur', () => {
+            if (!searchInput.value) {
+                startPlaceholderRotation();
+            }
+        });
+
+
+        // Initial setup
+        standardizeData();
+        createFilterCheckboxes('features', 'features-filter-list');
+        createFilterCheckboxes('pricing', 'pricing-filter-list');
+        createFilterCheckboxes('bestFor', 'bestfor-filter-list');
+        showGridView();
+        performSearchAndFilter();
+        updateAuthUI();
+        startPlaceholderRotation();
+    </script>
+</body>
+</html>
