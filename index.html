@@ -311,20 +311,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const toolsData = [
-             // Existing Tools...
-            { id: 1, name: "ChatGPT (OpenAI)", category: "Marketing & Content Creation", description: "A powerful generative AI model that creates human-like text for a wide range of applications, including blog posts, social media updates, email newsletters, and detailed property descriptions. Essential for content scaling.", icon: "https://placehold.co/80x80/74AA9C/ffffff?text=GPT", upvotes: 5231, website: "https://chat.openai.com", founded: 2022, hq: "San Francisco, USA", features: ["Content Generation", "Summarization", "Translation", "Brainstorming", "API Access"], pricing: "Freemium", bestFor: ["Individuals", "Small Businesses", "Enterprises"] },
-            { id: 2, name: "Midjourney", category: "Marketing & Content Creation", description: "Generates high-quality, unique images from text prompts. Ideal for creating aspirational marketing materials, social media visuals, and conceptual destination art without needing a photoshoot.", icon: "https://placehold.co/80x80/1E2E47/ffffff?text=MJ", upvotes: 4892, website: "https://www.midjourney.com", founded: 2022, hq: "San Francisco, USA", features: ["Text-to-Image", "Artistic Styles", "Image Upscaling", "High-Resolution"], pricing: "Paid", bestFor: ["Individuals", "Designers"] },
-            // ... (rest of the original 60 tools)
-
-            // Website & App Building
-            { id: 112, name: "Wix ADI", category: "Website & App Building", description: "Wix's Artificial Design Intelligence builds a personalized website for you in minutes based on a few simple questions.", icon: "https://placehold.co/80x80/000000/ffffff?text=Wix", upvotes: 3200, website: "https://www.wix.com/adi", founded: 2016, hq: "Tel Aviv, Israel", features: ["Website Builder", "AI Design", "Easy Setup"], pricing: "Freemium", bestFor: ["Small Businesses", "Individuals"] },
-            { id: 113, name: "Framer AI", category: "Website & App Building", description: "Generate and publish a website from a text prompt. AI can handle copywriting, layout, and styling.", icon: "https://placehold.co/80x80/8A2BE2/ffffff?text=Fr", upvotes: 3100, website: "https://www.framer.com/ai", founded: 2022, hq: "Amsterdam, Netherlands", features: ["Website Builder", "Text-to-Website", "AI Design"], pricing: "Freemium", bestFor: ["Designers", "Startups"] },
-            { id: 114, name: "Durable", category: "Website & App Building", description: "Claims to build a website with images, copy, and a contact form in 30 seconds.", icon: "https://placehold.co/80x80/F472B6/ffffff?text=Du", upvotes: 2950, website: "https://durable.co", founded: 2022, hq: "Vancouver, Canada", features: ["Website Builder", "AI Content Assistant", "CRM"], pricing: "Paid", bestFor: ["Small Businesses"] },
-            { id: 115, name: "Bubble.io", category: "Website & App Building", description: "A no-code platform for building digital products, including complex web apps, with AI-assisted development features.", icon: "https://placehold.co/80x80/6366F1/ffffff?text=Bb", upvotes: 3500, website: "https://bubble.io", founded: 2012, hq: "New York, USA", features: ["No-Code Platform", "App Builder", "Workflow Automation"], pricing: "Freemium", bestFor: ["Startups", "Developers"] },
-            { id: 116, name: "Webflow", category: "Website & App Building", description: "A visual web development platform with upcoming AI features to help design and build professional websites.", icon: "https://placehold.co/80x80/146EF5/ffffff?text=Wf", upvotes: 3400, website: "https://webflow.com", founded: 2013, hq: "San Francisco, USA", features: ["Website Builder", "CMS", "Visual Design"], pricing: "Freemium", bestFor: ["Designers", "Enterprises"] },
-            // ... (and so on for the rest of the 100+ new tools)
-        ];
+        let toolsData = [];
         
         const useCases = [
             "e.g., Generate a blog post about sustainable travel",
@@ -458,7 +445,7 @@
                              <button class="save-btn absolute top-2 right-2 p-2 rounded-full hover:bg-red-100 ${isSaved ? 'saved' : ''}" data-tool-id="${tool.id}">
                                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
                             </button>
-                            <img src="${tool.icon}" alt="${tool.name} Icon" class="w-20 h-20 mb-4 rounded-full mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/80x80/cccccc/ffffff?text=Error';">
+                            <img src="${tool.icon}" alt="${tool.name} Icon" class="w-20 h-20 mb-4 rounded-full mx-auto" onerror="this.onerror=null;this.src='https.placehold.co/80x80/cccccc/ffffff?text=Error';">
                             <h3 class="text-xl font-bold mb-2">${tool.name}</h3>
                             <p class="text-gray-600 mb-4 flex-grow">${shortDesc}</p>
                             <div class="mt-auto flex justify-between items-center w-full">
