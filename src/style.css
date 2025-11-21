@@ -1,0 +1,732 @@
+/*
+    Alan Elliott Merschen Personal Site Styles
+    Theme: Editorial, Spacious, Confident, Minimal
+    Palette:
+      Primary Deep Blue: #034890
+      Accent Gold: #F5B703
+      Text/Neutral: #FFFFFF, #F8F8F8 (light background)
+    Typography:
+      Headings: 'Playfair Display', serif
+      Body: 'Inter', sans-serif
+*/
+
+/* --- 1. Global Reset & Variables --- */
+:root {
+    /* Colors */
+    --color-primary: #034890;
+    --color-accent: #F5B703;
+    --color-text-dark: #333333;
+    --color-text-light: #ffffff;
+    --color-bg-light: #F8F8F8;
+    --color-border: #e0e0e0;
+    
+    /* Typography */
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', 'Montserrat', sans-serif;
+
+    /* Spacing */
+    --spacing-xxl: 8rem;
+    --spacing-xl: 6rem;
+    --spacing-lg: 4rem;
+    --spacing-md: 2rem;
+    --spacing-sm: 1rem;
+    
+    /* Transitions */
+    --transition-duration: 0.3s;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--color-text-dark);
+    line-height: 1.6;
+    background-color: var(--color-text-light);
+}
+
+/* --- 2. Typography & Links --- */
+h1, h2, h3 {
+    font-family: var(--font-serif);
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-md);
+}
+
+h3 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-duration), opacity var(--transition-duration);
+}
+
+a:hover, a:focus {
+    color: var(--color-accent);
+    outline: none;
+}
+
+p {
+    margin-bottom: 1.25rem;
+}
+
+.section-heading {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: var(--spacing-md);
+    font-weight: 500;
+}
+
+.section-heading.centered, .section-intro.centered {
+    text-align: center;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.section-intro {
+    font-size: 1.15rem;
+    margin-bottom: var(--spacing-xl);
+    color: #555;
+}
+
+/* --- 3. Layout & Structure --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.section {
+    padding: var(--spacing-xl) 0;
+}
+
+.light-bg {
+    background-color: var(--color-bg-light);
+}
+
+/* --- 4. Header & Navigation --- */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: var(--spacing-sm) 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.logo-text {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+}
+
+.logo-text a {
+    color: var(--color-primary);
+    text-transform: uppercase;
+}
+
+/* Hamburger Menu Icon */
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 25px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1010;
+}
+
+.hamburger:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+}
+
+.hamburger .bar {
+    width: 100%;
+    height: 3px;
+    background-color: var(--color-primary);
+    transition: all 0.3s ease-in-out;
+    transform-origin: 1px;
+}
+
+/* Overlay Menu */
+.overlay-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-primary);
+    z-index: 999;
+    /* Initial state: off-screen to the left */
+    transform: translateX(-100%);
+    transition: transform 0.5s cubic-bezier(0.86, 0, 0.07, 1); /* Elegant slide-in */
+    padding-top: 100px;
+    overflow-y: auto;
+}
+
+.overlay-menu.is-open {
+    transform: translateX(0);
+}
+
+.menu-list {
+    list-style: none;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    max-width: 600px;
+}
+
+.menu-list li {
+    margin-bottom: var(--spacing-md);
+}
+
+.menu-list a {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 8vw, 4rem);
+    font-weight: 500;
+    color: var(--color-text-light);
+    display: inline-block;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+.menu-list a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: var(--color-accent);
+    transition: width 0.3s ease-in-out;
+}
+
+.menu-list a:hover::after, .menu-list a:focus::after {
+    width: 100%;
+}
+
+/* --- 5. Buttons & Controls --- */
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.8rem;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    border-radius: 4px;
+    transition: all var(--transition-duration);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+}
+
+.btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-primary);
+    border: 2px solid var(--color-accent);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: transparent;
+    color: var(--color-accent);
+}
+
+.btn-secondary-text {
+    color: var(--color-text-light);
+    border: none;
+    padding: 0.8rem 0;
+    margin-left: var(--spacing-md);
+    text-transform: none;
+    font-size: 1rem;
+    font-weight: 400;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.btn-secondary-text:hover, .btn-secondary-text:focus {
+    color: var(--color-accent);
+    text-decoration-color: var(--color-accent);
+}
+
+/* --- 6. Section Styles --- */
+
+/* Hero Section */
+.hero-section {
+    min-height: 100vh;
+    background-color: var(--color-primary);
+    color: var(--color-text-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    padding-top: 80px; /* Account for fixed header */
+}
+
+.hero-content {
+    z-index: 10;
+    flex: 1;
+    padding: var(--spacing-xl) var(--spacing-md);
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.hero-headline {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 500;
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-subhead {
+    font-size: 1.25rem;
+    font-weight: 300;
+    margin-bottom: var(--spacing-lg);
+}
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Hero Panels (Door Animation) */
+.hero-panels {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    perspective: 1000px; /* Establish 3D space */
+}
+
+.panel {
+    position: absolute;
+    width: 250px;
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+    background-color: #333;
+    transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s;
+    opacity: 0.6;
+    border: 5px solid var(--color-primary);
+    
+    /* Initial stacked state */
+    transform: translate(-50%, -50%) rotateY(0deg);
+    top: 50%;
+    left: 50%;
+    z-index: 1; 
+}
+
+/* Final "Open Door" Configuration (used by JS to apply keyframe) */
+.panel-1 { transform: translate(-100%, -100%) rotateY(-5deg); top: 50%; left: 50%; }
+.panel-2 { transform: translate(0%, -100%) rotateY(5deg); top: 50%; left: 50%; }
+.panel-3 { transform: translate(-100%, 0%) rotateY(5deg); top: 50%; left: 50%; }
+.panel-4 { transform: translate(0%, 0%) rotateY(-5deg); top: 50%; left: 50%; }
+
+/* Initial stacked position (for animation start) - set to `hero-panels.is-initial` */
+.hero-panels:not(.is-animated) .panel {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+}
+
+/* Keyframes for opening animation */
+@keyframes openDoors {
+    0% { transform: translate(-50%, -50%) scale(0.9) rotateY(0deg); opacity: 0; }
+    100% { opacity: 0.6; } /* Target positions are handled by .is-animated class */
+}
+
+/* Animation applied via JS class */
+.hero-panels.is-animated .panel-1 { animation: openDoors 1.2s ease-out forwards; transform: translate(-100%, -100%) rotateY(-5deg); }
+.hero-panels.is-animated .panel-2 { animation: openDoors 1.2s ease-out 0.2s forwards; transform: translate(0%, -100%) rotateY(5deg); }
+.hero-panels.is-animated .panel-3 { animation: openDoors 1.2s ease-out 0.4s forwards; transform: translate(-100%, 0%) rotateY(5deg); }
+.hero-panels.is-animated .panel-4 { animation: openDoors 1.2s ease-out 0.6s forwards; transform: translate(0%, 0%) rotateY(-5deg); }
+
+
+.panel:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transform: scale(1.05) rotateY(0deg) !important; /* Override animation/class transforms slightly */
+    opacity: 0.8;
+}
+
+/* Story Section */
+.story-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr;
+    gap: var(--spacing-xl);
+    align-items: flex-start;
+}
+
+.story-text {
+    max-width: 650px;
+}
+
+.story-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.pull-quote {
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    border-left: 3px solid var(--color-accent);
+    padding-left: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+}
+
+/* How I Help Section */
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.service-card {
+    background-color: var(--color-text-light);
+    padding: var(--spacing-lg);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+    color: var(--color-primary);
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.card-description {
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Clients & Boards Section */
+.logo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.logo-placeholder {
+    height: 100px;
+    background-color: var(--color-bg-light);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: #999;
+    padding: var(--spacing-sm);
+    text-align: center;
+}
+
+/* Insights Section */
+.article-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.article-card {
+    background-color: var(--color-text-light);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    transition: box-shadow 0.3s ease;
+}
+
+.article-card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.article-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.article-content {
+    padding: var(--spacing-md);
+}
+
+.article-category {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+}
+
+.article-title {
+    font-family: var(--font-serif);
+    margin-top: 0.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.article-teaser {
+    font-size: 0.95rem;
+    color: #666;
+    margin-bottom: var(--spacing-sm);
+}
+
+.read-more {
+    color: var(--color-primary);
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.read-more:hover {
+    color: var(--color-accent);
+}
+
+/* Quote Strip (Marquee) */
+.quote-strip {
+    background-color: var(--color-primary);
+    padding: var(--spacing-lg) 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.marquee-content {
+    display: inline-block;
+    animation: marquee 40s linear infinite;
+    padding-left: 100%; /* Start off-screen */
+}
+
+.quote {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: var(--color-accent);
+    font-style: italic;
+    font-weight: 400;
+    margin-right: var(--spacing-xl);
+    white-space: nowrap;
+    display: inline-block;
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(0%);
+    }
+    to {
+        transform: translateX(-50%); /* Half the content width */
+    }
+}
+
+/* Contact Section */
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: var(--spacing-xl);
+}
+
+.contact-text {
+    padding-top: var(--spacing-md);
+}
+
+.contact-details {
+    margin-top: var(--spacing-lg);
+    font-style: normal;
+}
+
+.contact-link {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.social-links a {
+    font-weight: 600;
+    margin-right: 15px;
+}
+
+.contact-form {
+    background-color: var(--color-bg-light);
+    padding: var(--spacing-lg);
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.contact-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-primary);
+}
+
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(245, 183, 3, 0.3);
+    outline: none;
+}
+
+.contact-form textarea {
+    resize: vertical;
+}
+
+.btn-submit {
+    width: 100%;
+    text-align: center;
+    margin-top: var(--spacing-sm);
+}
+
+.form-message {
+    margin-top: var(--spacing-sm);
+    font-weight: 600;
+    color: #e74c3c; /* Error red */
+}
+
+.form-message.success {
+    color: #27ae60; /* Success green */
+}
+
+/* Footer */
+.footer {
+    background-color: #222;
+    color: #aaa;
+    text-align: center;
+    padding: var(--spacing-sm);
+    font-size: 0.8rem;
+}
+
+.footer a {
+    color: #ccc;
+}
+
+/* --- 7. Media Queries (Responsiveness) --- */
+
+/* Tablet & Smaller Desktop */
+@media (max-width: 1024px) {
+    .section {
+        padding: var(--spacing-lg) 0;
+    }
+    
+    /* Hero */
+    .hero-content {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+    .hero-panels {
+        display: none; /* Hide panels on smaller screens for simplicity/performance */
+    }
+
+    /* Story */
+    .story-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+    .story-image {
+        order: -1; /* Image first on mobile */
+    }
+
+    /* Contact */
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    :root {
+        --spacing-xxl: 5rem;
+        --spacing-xl: 3rem;
+        --spacing-lg: 2rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    .section-intro {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    /* Header */
+    .header {
+        padding: 0.5rem 0;
+    }
+    
+    /* Hero */
+    .hero-headline {
+        font-size: 2.5rem;
+    }
+    .hero-actions {
+        flex-direction: column;
+    }
+    .btn-secondary-text {
+        margin-left: 0;
+        margin-top: var(--spacing-sm);
+    }
+
+    /* Overlay Menu */
+    .menu-list a {
+        font-size: 2rem;
+    }
+}
