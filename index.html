@@ -79,7 +79,7 @@
                 <a href="#">AI Pro Tools | Tourism</a>
             </div>
             <div class="flex items-center">
-                <div id="auth-links" class="hidden md:flex space-x-4 items-center">
+                <div id="auth-links" class="flex space-x-4 items-center">
                     <a href="#" id="login-btn" class="text-gray-600 hover:text-blue-600 transition duration-300">Login</a>
                     <a href="#" id="signup-btn" class="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300">Sign Up</a>
                 </div>
@@ -226,11 +226,12 @@
              <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
             <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
             <form id="signup-form">
-                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
-                <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-4" required>
+                <input id="signup-email" type="email" name="email" autocomplete="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
+                <input id="signup-password" type="password" name="password" autocomplete="new-password" placeholder="Password (min. 6 characters)" class="w-full p-2 border rounded mb-4" required>
                 <p id="signup-error" class="text-red-500 text-sm mb-4 hidden"></p>
-                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Create Account</button>
+                <button id="signup-submit-btn" type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Create Account</button>
             </form>
+            <p class="text-sm text-center text-gray-600 mt-4">Already have an account? <a href="#" id="switch-to-login" class="text-blue-600 hover:underline">Login</a></p>
         </div>
     </div>
     <div id="login-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
@@ -238,14 +239,15 @@
             <button class="close-modal-btn absolute top-2 right-4 text-2xl text-gray-500 hover:text-gray-800">&times;</button>
             <h2 class="text-2xl font-bold mb-4">Login</h2>
             <form id="login-form">
-                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
-                <input type="password" placeholder="Password" class="w-full p-2 border rounded mb-2" required>
+                <input id="login-email" type="email" name="email" autocomplete="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
+                <input id="login-password" type="password" name="password" autocomplete="current-password" placeholder="Password" class="w-full p-2 border rounded mb-2" required>
                 <div class="text-right mb-4">
                     <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline">Forgot Password?</a>
                 </div>
                 <p id="login-error" class="text-red-500 text-sm mb-4 hidden"></p>
-                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Login</button>
+                <button id="login-submit-btn" type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Login</button>
             </form>
+            <p class="text-sm text-center text-gray-600 mt-4">Don't have an account? <a href="#" id="switch-to-signup" class="text-blue-600 hover:underline">Sign Up</a></p>
         </div>
     </div>
     <div id="forgot-password-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
@@ -254,7 +256,7 @@
             <h2 class="text-2xl font-bold mb-4">Reset Password</h2>
             <form id="forgot-password-form">
                 <p class="text-sm text-gray-600 mb-4">Enter your email address and we will send you a link to reset your password.</p>
-                <input type="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
+                <input id="forgot-email" type="email" name="email" autocomplete="email" placeholder="Email" class="w-full p-2 border rounded mb-2" required>
                 <p id="forgot-password-error" class="text-red-500 text-sm mb-4 hidden"></p>
                 <p id="forgot-password-success" class="text-green-500 text-sm mb-4 hidden"></p>
                 <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Send Reset Link</button>
@@ -811,6 +813,26 @@
         });
 
         // --- Auth Logic ---
+        function getFirebaseErrorMessage(error) {
+            const messages = {
+                'auth/email-already-in-use': 'An account with this email already exists.',
+                'auth/invalid-email': 'Please enter a valid email address.',
+                'auth/weak-password': 'Password must be at least 6 characters.',
+                'auth/user-not-found': 'No account found with this email.',
+                'auth/wrong-password': 'Incorrect password. Please try again.',
+                'auth/invalid-credential': 'Incorrect email or password. Please try again.',
+                'auth/too-many-requests': 'Too many failed attempts. Please try again later.',
+                'auth/network-request-failed': 'Network error. Please check your connection.',
+                'auth/user-disabled': 'This account has been disabled.',
+            };
+            return messages[error.code] || 'Something went wrong. Please try again.';
+        }
+
+        function setButtonLoading(btn, isLoading, originalText) {
+            btn.disabled = isLoading;
+            btn.textContent = isLoading ? 'Please wait...' : originalText;
+        }
+
         function updateAuthUI(user) {
             currentUser = user;
             if (currentUser) {
@@ -841,7 +863,19 @@
             e.preventDefault();
             signupModal.classList.remove('hidden');
         });
-        
+
+        document.getElementById('switch-to-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModal(signupModal);
+            loginModal.classList.remove('hidden');
+        });
+
+        document.getElementById('switch-to-signup').addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModal(loginModal);
+            signupModal.classList.remove('hidden');
+        });
+
         accountBtn.addEventListener('click', () => {
             accountDropdownMenu.classList.toggle('hidden');
         });
@@ -872,7 +906,7 @@
 
         forgotPasswordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = e.target.elements[0].value;
+            const email = document.getElementById('forgot-email').value;
             forgotPasswordError.classList.add('hidden');
             forgotPasswordSuccess.classList.add('hidden');
             try {
@@ -881,44 +915,48 @@
                 forgotPasswordSuccess.classList.remove('hidden');
                 e.target.reset();
             } catch (error) {
-                forgotPasswordError.textContent = error.message;
+                forgotPasswordError.textContent = getFirebaseErrorMessage(error);
                 forgotPasswordError.classList.remove('hidden');
             }
         });
 
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = e.target.elements[0].value;
-            const password = e.target.elements[1].value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
             signupError.classList.add('hidden');
+            const submitBtn = document.getElementById('signup-submit-btn');
+            setButtonLoading(submitBtn, true, 'Create Account');
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                // Create a document for the new user
-                await setDoc(doc(db, "users", user.uid), {
-                    email: user.email,
-                    savedTools: []
-                });
+                // createUserWithEmailAndPassword triggers onAuthStateChanged, which
+                // handles creating the Firestore user document, so no setDoc needed here.
+                await createUserWithEmailAndPassword(auth, email, password);
                 closeModal(signupModal);
                 e.target.reset();
             } catch (error) {
-                signupError.textContent = error.message;
+                signupError.textContent = getFirebaseErrorMessage(error);
                 signupError.classList.remove('hidden');
+            } finally {
+                setButtonLoading(submitBtn, false, 'Create Account');
             }
         });
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = e.target.elements[0].value;
-            const password = e.target.elements[1].value;
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
             loginError.classList.add('hidden');
+            const submitBtn = document.getElementById('login-submit-btn');
+            setButtonLoading(submitBtn, true, 'Login');
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 closeModal(loginModal);
                 e.target.reset();
             } catch (error) {
-                loginError.textContent = error.message;
+                loginError.textContent = getFirebaseErrorMessage(error);
                 loginError.classList.remove('hidden');
+            } finally {
+                setButtonLoading(submitBtn, false, 'Login');
             }
         });
 
