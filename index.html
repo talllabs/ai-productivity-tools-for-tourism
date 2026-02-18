@@ -462,34 +462,41 @@
             });
         }
 
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
         function createFilterCheckboxes(filterType, containerId) {
             const container = document.getElementById(containerId);
             const uniqueValues = [...new Set(toolsData.flatMap(tool => tool[filterType] || []))];
             uniqueValues.sort();
-            
+
             container.innerHTML = uniqueValues.map(value => `
                 <label class="flex items-center space-x-2 text-sm">
-                    <input type="checkbox" class="filter-checkbox rounded" data-filter-type="${filterType}" value="${value}">
-                    <span>${value}</span>
+                    <input type="checkbox" class="filter-checkbox rounded" data-filter-type="${escapeHtml(filterType)}" value="${escapeHtml(value)}">
+                    <span>${escapeHtml(value)}</span>
                 </label>
             `).join('');
         }
 
         const displayTools = (tools) => {
-            toolsGrid.innerHTML = '';
             if (tools.length === 0) {
                 toolsGrid.innerHTML = `<p class="col-span-full text-center text-gray-500">No tools found matching your criteria.</p>`;
             } else {
-                tools.forEach(tool => {
+                const cards = tools.map(tool => {
                     const shortDesc = tool.description.split('. ')[0] + '.';
                     const isUpvoted = upvotedTools.has(tool.id);
                     const isSaved = currentUser && currentUser.savedTools.has(tool.id);
-                    const toolCard = `
+                    return `
                         <div class="tool-card bg-white rounded-lg shadow-md p-6 text-center" data-category="${tool.category}" data-id="${tool.id}">
                              <button class="save-btn absolute top-2 right-2 p-2 rounded-full hover:bg-red-100 ${isSaved ? 'saved' : ''}" data-tool-id="${tool.id}">
                                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
                             </button>
-                            <img src="${tool.icon}" alt="${tool.name} Icon" class="w-20 h-20 mb-4 rounded-full mx-auto" onerror="this.onerror=null;this.src='https.placehold.co/80x80/cccccc/ffffff?text=Error';">
+                            <img src="${tool.icon}" alt="${tool.name} Icon" class="w-20 h-20 mb-4 rounded-full mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/80x80/cccccc/ffffff?text=Error';">
                             <h3 class="text-xl font-bold mb-2">${tool.name}</h3>
                             <p class="text-gray-600 mb-4 flex-grow">${shortDesc}</p>
                             <div class="mt-auto flex justify-between items-center w-full">
@@ -501,8 +508,8 @@
                             </div>
                         </div>
                     `;
-                    toolsGrid.innerHTML += toolCard;
                 });
+                toolsGrid.innerHTML = cards.join('');
             }
         };
 
@@ -641,12 +648,12 @@
             const tool = toolsData.find(t => t.id === toolId);
             if (tool) {
                 const userDocRef = doc(db, "users", currentUser.uid);
-                if (currentUser.savedTools.has(toolId)) {
+                const wasSaved = currentUser.savedTools.has(toolId);
+                // Optimistically update local state
+                if (wasSaved) {
                     currentUser.savedTools.delete(toolId);
-                    await updateDoc(userDocRef, { savedTools: arrayRemove(toolId) });
                 } else {
                     currentUser.savedTools.add(toolId);
-                    await updateDoc(userDocRef, { savedTools: arrayUnion(toolId) });
                 }
                 performSearchAndFilter(); // Re-render to update heart states
                 // Also update detail view if it's open
@@ -657,6 +664,22 @@
                     } else {
                         saveBtnDetail.classList.remove('saved');
                     }
+                }
+                try {
+                    if (wasSaved) {
+                        await updateDoc(userDocRef, { savedTools: arrayRemove(toolId) });
+                    } else {
+                        await updateDoc(userDocRef, { savedTools: arrayUnion(toolId) });
+                    }
+                } catch (error) {
+                    // Revert optimistic update on failure
+                    if (wasSaved) {
+                        currentUser.savedTools.add(toolId);
+                    } else {
+                        currentUser.savedTools.delete(toolId);
+                    }
+                    console.error('Failed to update saved tools:', error);
+                    performSearchAndFilter();
                 }
             }
         }
@@ -833,7 +856,11 @@
 
         logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            await signOut(auth);
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error('Sign out failed:', error);
+            }
             accountDropdownMenu.classList.add('hidden');
         });
 
@@ -898,14 +925,19 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // User is signed in
-                const userDocRef = doc(db, "users", user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                    const userData = userDocSnap.data();
-                    user.savedTools = new Set(userData.savedTools || []);
-                } else {
-                    // This case handles users who signed up but their doc wasn't created, or for safety.
-                    await setDoc(userDocRef, { email: user.email, savedTools: [] });
+                try {
+                    const userDocRef = doc(db, "users", user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        user.savedTools = new Set(userData.savedTools || []);
+                    } else {
+                        // This case handles users who signed up but their doc wasn't created, or for safety.
+                        await setDoc(userDocRef, { email: user.email, savedTools: [] });
+                        user.savedTools = new Set();
+                    }
+                } catch (error) {
+                    console.error('Failed to load user data:', error);
                     user.savedTools = new Set();
                 }
                 updateAuthUI(user);
@@ -969,7 +1001,7 @@
         createFilterCheckboxes('bestFor', 'bestfor-filter-list');
         showGridView();
         performSearchAndFilter();
-        updateAuthUI();
+        updateAuthUI(null);
         startPlaceholderRotation();
     </script>
 </body>
